@@ -1,0 +1,30 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/).
+Individual files in this project try to adhere to [Semantic Versioning](http://semver.org/),
+however the project itself uses date versioning.
+
+---
+
+## TODO
+
+---
+
+## [Unreleased]
+### Added
+
+### Changed
+- Default path of templates directory changed from "~/Templates" to a directory
+  named 'templates' in the same path as the newfile command. This will be changed
+  in the install script.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+---
