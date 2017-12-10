@@ -35,7 +35,7 @@ clean:
 .PHONY: pre-build
 pre-build:
 	@echo "Pre-build start..."
-	../bin/newfile --help-rest >_inc/newfile.inc
+	../newfile --help-rest >_inc/newfile.inc
 	../templates/python-script --help-rest >_inc/python-script.inc
 	../templates/shell-script --help-rest >_inc/shell-script.inc
 	@echo "...pre-build done."
