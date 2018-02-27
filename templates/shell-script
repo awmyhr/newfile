@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20171128-135052' #: date of most recent revision
+__revised__='20180227-152551' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -45,7 +45,7 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='1.4.1'             #: version of template file used
+__template_version__='1.5.0'             #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'      #: attempted style for documentation
@@ -156,6 +156,50 @@ _version() {
 }
 
 #==============================================================================
+# ENV defaults
+LOGGER_DSF=${LOGGER_DSF:="%Y%m%d-%H%M%S"}
+case $(printf '%s' "${LOGGER_LVL:="info"}" | tr '[:upper:]' '[:lower:]') in
+    debug)          LOGGER_LVL=10 ;;
+    info)           LOGGER_LVL=20 ;;
+    warn|warning)   LOGGER_LVL=30 ;;
+    error)          LOGGER_LVL=40 ;;
+    crit|critical)  LOGGER_LVL=50 ;;
+    *)              LOGGER_LVL=0 ;;
+esac
+
+logger() {
+    #:"""
+    #: .. function:: logger()
+    #:
+    #: Provides an interface similar to Python's logging module
+    #:
+    #: :param str log_level:     String indicating log level
+    #: :param str log_string:    String to print
+    #: .. note::
+    #:     This was inspired by tinylogger (Copyright (c) 2017 Nagarjuna
+    #:     Kumarappan), but I think there is very little left of the original
+    #:     code here. See: https://github.com/nk412/tinylogger
+    #:"""
+    case $(printf '%s' "${1}") in 
+        debug)          action_tag='DEBUG'    ; log_level_th=10 ;;
+        info)           action_tag='INFO'     ; log_level_th=20 ;;
+        warn|warning)   action_tag='WARNING'  ; log_level_th=30 ;;
+        error)          action_tag='ERROR'    ; log_level_th=40 ;;
+        crit|critical)  action_tag='CRITICAL' ; log_level_th=50 ;;
+        *)              action_tag='UNKNOWN'  ; log_level_th=0 ;;
+    esac
+    shift
+
+    if [ ${LOGGER_LVL} -le ${log_level_th} ]; then
+        if [ "${script_debug}" = true ]; then
+            printf '%s %-10s ' "$(date "+${LOGGER_DSF}")" "${action_tag}"
+        fi
+        printf '%s\n' "${@}"
+    fi
+    true
+}
+
+#==============================================================================
 _debug_info() {
     #:"""
     #: .. function:: _debug_info()
@@ -168,21 +212,21 @@ _debug_info() {
     # shellcheck disable=SC1007
     script_path="$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd )"
 
-    printf 'DEBUG    Cononical: %s\n' "${__cononical_name__}"
-    printf 'DEBUG    Abs Path:  %s\n' "${script_path}/${__basename__}"
-    printf 'DEBUG    Args List: %s\n' "$@"
-    printf 'DEBUG    Version:   %s\n' "${__version__}"
-    printf 'DEBUG    Created:   %s\n' "${__created__}"
-    printf 'DEBUG    Revised:   %s\n' "${__revised__}"
-    printf 'DEBUG    Coder(s):  %s\n' "${__author__}"
-    printf 'DEBUG    Contact:   %s\n' "${__contact__}"
-    printf 'DEBUG    Project:   %s\n' "${__project_name__}"
-    printf 'DEBUG    Project Home: %s\n' "${__project_home__}"
-    printf 'DEBUG    Template Version: %s\n' "${__template_version__}"
-    printf 'DEBUG    System:    %s\n' "$(uname -orv)"
-    printf 'DEBUG    Hostname:  %s\n' "$(hostname)"
-    printf 'DEBUG    [re]uid:   %s/%s\n' "$(id -ur)", "$(id -u)"
-    printf 'DEBUG    PID/PPID:  %s/%s\n' "", "${PPID}"
+    logger debug "Cononical: ${__cononical_name__}"
+    logger debug "Abs Path:  ${script_path}/${__basename__}"
+    logger debug "Args List: ${*}"
+    logger debug "Version:   ${__version__}"
+    logger debug "Created:   ${__created__}"
+    logger debug "Revised:   ${__revised__}"
+    logger debug "Coder(s):  ${__author__}"
+    logger debug "Contact:   ${__contact__}"
+    logger debug "Project:   ${__project_name__}"
+    logger debug "Project Home: ${__project_home__}"
+    logger debug "Template Version: ${__template_version__}"
+    logger debug "System:    $(uname -orv)"
+    logger debug "Hostname:  $(hostname)"
+    logger debug "[re]uid:   $(id -ur)/$(id -u)"
+    logger debug "PID/PPID:  /${PPID}"
     printf '\n%s\n' '----- start -----'
 }
 
@@ -255,8 +299,9 @@ _init() {
 #==============================================================================
 #-- Check for debug flag & process
 if [ "${*#*--debug}" != "${*}" ]; then
-    _debug_info "$@"
     script_debug=true
+    LOGGER_LVL=10
+    _debug_info "$@"
     set -o xtrace
 else
     script_debug=false
@@ -301,7 +346,7 @@ _init
 
 #==============================================================================
 #-- TODO: Do something more interesting here...{#
-printf '%s\n' 'Hello world!'
+logger info 'Hello world!'
 #}
 
 #==============================================================================
