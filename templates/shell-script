@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180302-125104' #: date of most recent revision
+__revised__='20180302-141536' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -347,7 +347,11 @@ _init
 
 #==============================================================================
 #-- TODO: Do something more interesting here...{#
-logger info 'Hello world!'
+logger debug "this is a debug"
+logger info  "this is an info"
+logger warn  "this is a warning"
+logger error "this is an error"
+logger crit  "this is critical"
 #}
 
 #==============================================================================
