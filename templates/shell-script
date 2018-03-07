@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180302-141536' #: date of most recent revision
+__revised__='20180307-110709' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -190,11 +190,21 @@ logger() {
     esac
     shift
 
-    if [ ${LOGGER_LVL} -le ${log_level_th} ]; then
+    if [ "${LOGGER_LVL}" -le "${log_level_th}" ]; then
         if [ "${script_debug}" = true ]; then
             printf '%s %-10s ' "$(date "+${LOGGER_DSF}")" "${action_tag}"
         fi
-        printf '%s\n' "${@}"
+        if [ "${log_level_th}" -le 10 ]; then
+            printf 'debug: %s\n' "${@}"
+        elif [ "${log_level_th}" -le 20 ]; then
+            printf '%s\n' "${@}"
+        elif [ "${log_level_th}" -le 30 ]; then
+            printf 'Warning: %s\n' "${@}" 1>&2
+        elif [ "${log_level_th}" -le 40 ]; then
+            printf 'Error: %s\n' "${@}" 1>&2
+        else
+            printf 'CRITICAL: %s\n' "${@}" 1>&2
+        fi
     fi
     true
 }
