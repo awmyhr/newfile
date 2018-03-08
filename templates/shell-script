@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180307-141341' #: date of most recent revision
+__revised__='20180308-104605' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -45,16 +45,21 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='1.7.1'             #: version of template file used
+__template_version__='1.8.0'             #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'      #: attempted style for documentation
 __basename__="${0}" #: name script run as
 #------------------------------------------------------------------------------
-#-- The following are string formats (prepended with strfmt_)
-#-- NOTE: (you can ignore ShellCheck [SC2059] errors in lines
-#         where these are used)
-strfmt_error="${__cononical_name__}: %s\\n"
+#-- use colors if they are set in the ENV
+cf_black=${cf_black:=''}   ; cf_white=${cf_white:=''}
+cf_orange=${cf_orange:=''} ; cf_magenta=${cf_magenta:=''}
+cf_yellow=${cf_yellow:=''} ; cf_red=${cf_red:=''}
+cf_purple=${cf_purple:=''} ; cf_blue=${cf_blue:=''}
+cf_cyan=${cf_cyan:=''}     ; cf_green=${cf_green:=''}
+c_bold=${c_bold:=''}       ; c_reset=${c_reset:=''}
+c_undr=${c_undr:=''}       ; c_hide=${c_hide:=''}
+c_blik=${c_blik:=''}       ; c_revr=${c_revr:=''}
 #==============================================================================
 _usage_options() {
     #:"""
@@ -193,23 +198,25 @@ logger() {
     shift
 
     if [ "${LOGGER_FILE_SET}" = "true" ]; then
-        printf '%s [%s]: %s\n' "$(date "+${LOGGER_DSF}")" "${action_tag}" "${@}" 1>&3
+        printf '%s [%s]: %s\n' "$(date "+${LOGGER_DSF}")" \
+                               "${action_tag}" "${@}" 1>&3
     fi
 
     if [ "${LOGGER_LVL}" -le "${log_level_th}" ]; then
         if [ "${script_debug}" = true ]; then
-            printf '%s %-10s ' "$(date "+${LOGGER_DSF}")" "${action_tag}"
+            printf '%s %-10s ' "${cf_blue}$(date "+${LOGGER_DSF}")" \
+                               "${action_tag}${c_reset}"
         fi
         if [ "${log_level_th}" -le 10 ]; then
-            printf 'debug: %s\n' "${@}"
+            printf '%sdebug: %s%s\n' "${cf_green}" "${@}" "${c_reset}"
         elif [ "${log_level_th}" -le 20 ]; then
-            printf '%s\n' "${@}"
+            printf '%s%s%s\n' "${cf_white}" "${@}" "${c_reset}"
         elif [ "${log_level_th}" -le 30 ]; then
-            printf 'Warning: %s\n' "${@}" 1>&2
+            printf '%sWarning: %s%s\n' "${cf_yellow}" "${@}" "${c_reset}" 1>&2
         elif [ "${log_level_th}" -le 40 ]; then
-            printf 'Error: %s\n' "${@}" 1>&2
+            printf '%sError: %s%s\n' "${cf_magenta}" "${@}" ""${c_reset} 1>&2
         else
-            printf 'CRITICAL: %s\n' "${@}" 1>&2
+            printf '%sCRITICAL: %s%s\n' "${cf_red}" "${@}" "${c_reset}" 1>&2
         fi
     fi
     true
@@ -260,8 +267,8 @@ exit_error() {
     #: .. warning::
     #:     This function exits the script
     #:"""
-    # shellcheck disable=SC2059
-    printf "${strfmt_error}" "${2}" 1>&2
+    printf '%s: %s\n' "${cf_red}${__cononical_name__}" \
+                      "${c_bold}${2}${c_reset}" 1>&2
     if [ "${LOGGER_FILE_SET}" = "true" ]; then
         printf '%s [EXIT]: %s\n' "$(date "+${LOGGER_DSF}")" "${2}" 1>&3
         printf "Log file created: %s\n" "${LOGGER_FILE}"
