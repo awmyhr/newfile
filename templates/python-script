@@ -65,7 +65,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '{{ date|default("TODO: CHANGEME", true) }}' #: date of most recent revision
+__revised__ = '20180328-163356' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 
 #-- The following few variables should be relatively static over life of script
@@ -76,7 +76,7 @@ __license__ = '{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '1.8.1'              #: version of template file used
+__template_version__ = '1.9.0'              #: version of template file used
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
@@ -358,13 +358,20 @@ if __name__ == '__main__':
     except KeyboardInterrupt: # Catches Ctrl-C
         logger.debug('Caught Ctrl-C')
         EXIT_STATUS = 130
-    except SystemExit: # Catches sys.exit()
+    except SystemExit as error: # Catches sys.exit()
         logger.debug('Caught SystemExit')
-        raise
+        logger.warning('%s: [SystemExit] %s', __basename__, error.strerror)
+        if error.errno is None:
+            EXIT_STATUS = 10
+        else:
+            EXIT_STATUS = error.errno
     #-- NOTE: "except Exception as variable:" syntax was added in 2.6
     except IOError as error:
         logger.debug('Caught IOError')
-        if error.errno == 2:                #: No such file/directory
+        if error.errno is None:
+            logger.critical('%s: [IOError]: %s', __basename__, error.message)
+            EXIT_STATUS = 10
+        elif error.errno == 2:                #: No such file/directory
             logger.critical('%s: [IOError] %s: %s', __basename__,
                             error.strerror, error.filename
                            )
@@ -387,10 +394,10 @@ if __name__ == '__main__':
         else:
             logger.critical('%s: [OSError] %s', __basename__, error.strerror)
             EXIT_STATUS = error.errno
-    # except:       #: This is _not_ working, see hack below
-    #     EXIT_STATUS = 1
-    #     # print "Unexpected error:", sys.exc_info()[0]
-    #     raise
+    except Exception as error:
+        logger.debug('Caught Exception')
+        logger.critical('%s: %s' % (__basename__, error))
+        EXIT_STATUS = 10
     else:
         logger.debug('main() exited cleanly.')
         EXIT_STATUS = os.EX_OK
@@ -399,9 +406,7 @@ if __name__ == '__main__':
         logger.debug('Mandatory clean-up.')
         if EXIT_STATUS is None:
             logger.debug('EXIT_STATUS is still None.')
-            EXIT_STATUS = 1
-            raise #: pylint: disable=misplaced-bare-raise
-                  #: Ignoring this here until I find a Better Way(TM)
+            EXIT_STATUS = 20
         if OPTIONS.debug:
             print '\n------ end ------\n'
         sys.exit(EXIT_STATUS)
