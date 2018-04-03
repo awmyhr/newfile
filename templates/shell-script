@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180403-152925' #: date of most recent revision
+__revised__='20180403-162624' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -44,7 +44,7 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.0.1'  #: version of template file used
+__template_version__='2.1.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -213,7 +213,7 @@ _debug_info() {
     logger debug "System:    $(uname -orv)"
     logger debug "Hostname:  $(hostname)"
     logger debug "[re]uid:   $(id -ur)/$(id -u)"
-    logger debug "PID/PPID:  /${PPID}"
+    logger debug "PID/PPID:  ${$}/${PPID}"
     logger debug '-----------------'
     logger debug '----- start -----'
     logger debug '-----------------'
@@ -348,6 +348,36 @@ exit_clean() {
         exec 3>&-
     fi
     exit 0
+}
+
+#==============================================================================
+get_temp() {
+    #:"""
+    #: .. function:: get_temp_dir()
+    #:
+    #: Creates a temporary file (or directory), returning the path. Defaults to file.
+    #:
+    #: :param str directory:   Pass any substring of 'directory' to create a directory
+    #:"""
+    if [ "${#}" -eq 1 ] && is_in_string "${1}" "directory"; then
+        __get_temp_dir='-d'
+    else
+        __get_temp_dir=''
+    fi
+    if command -v mktemp >/dev/null 2>&1; then
+        mktemp ${__get_temp_dir} -t "${__cononical_name__}${__get_temp_dir}.XXXXXXXXXX" || return "${?}"
+    else
+        if [ "${__get_temp_dir}" = '' ]; then
+            __get_temp_path="/tmp/${__cononical_name__}.${$}"
+            touch "${__get_temp_path}" || return "${?}"
+        else
+            __get_temp_path="/tmp/${__cononical_name__}-d.${$}"
+            mkdir "${__get_temp_path}" || return "${?}"
+        fi
+        printf "${__get_temp_path}"
+    fi
+
+    return
 }
 
 #==============================================================================
