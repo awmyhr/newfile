@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180403-105823' #: date of most recent revision
+__revised__='20180403-123512' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -45,11 +45,12 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='1.10.0'             #: version of template file used
+__template_version__='1.10.1'             #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'      #: attempted style for documentation
 __basename__="${0}" #: name script run as
+__logger_file_set__='false'
 #------------------------------------------------------------------------------
 #-- use colors if they are set in the ENV
 cf_black=${cf_black:=''}   ; cf_white=${cf_white:=''}
@@ -164,11 +165,6 @@ _version() {
 # Get logger() settings from ENV
 LOGGER_FILE=${LOGGER_FILE:="nil"}
 LOGGER_DSF=${LOGGER_DSF:="%Y%m%d-%H%M%S"}
-if [ "${__logger_file_set__}" = "nil" ]; then
-    __logger_file_set__='false'
-else
-    __logger_file_set__='true'
-fi
 case $(printf '%s' "${LOGGER_LVL:="info"}" | tr '[:upper:]' '[:lower:]') in
     debug)          LOGGER_LVL=10 ;;
     info)           LOGGER_LVL=20 ;;
@@ -255,7 +251,9 @@ _debug_info() {
     logger debug "Hostname:  $(hostname)"
     logger debug "[re]uid:   $(id -ur)/$(id -u)"
     logger debug "PID/PPID:  /${PPID}"
-    printf '\n%s\n' '----- start -----'
+    logger debug ''
+    logger debug '----- start -----'
+    logger debug ''
 }
 
 #==============================================================================
@@ -328,8 +326,10 @@ exit_clean() {
     #:"""
     [ "${__script_debug__}" = true ] && {
         set +o xtrace
+        logger debug ''
+        logger debug '------ end ------'
+        logger debug ''
         __script_debug__=false
-        printf '%s\n' '------ end ------'
     }
 
     trap - INT TERM HUP
