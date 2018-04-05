@@ -22,12 +22,6 @@
 
         Output debug-level information.
 
-    .. option:: --debug-file <FILE>
-
-        Save debug-level information to specified file.
-
-        .. note:: This output is more detailed, but less readable, than simple --debug
-
     :synopsis: {{ script_synopsis|default("TODO: CHANGEME", true) }}
 
     :copyright: {{ software_copyright|default("TODO: CHANGEME", true) }}
@@ -65,9 +59,12 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180405-115609' #: date of most recent revision
+__revised__ = '20180405-155626' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
-
+__synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
+__description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
+"""
+#------------------------------------------------------------------------------
 #-- The following few variables should be relatively static over life of script
 __author__ = ['{{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default("TODO: CHANGEME", true) }}>'] #: coder(s) of script
 __created__ = '{{ date|default("TODO: CHANGEME", true) }}'               #: date script originlly created
@@ -77,16 +74,23 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.0.0-alpha'              #: version of template file used
+__template_version__ = '2.0.0-alpha-02'              #: version of template file used
+#-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
-__synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
-__description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
-"""
+#------------------------------------------------------------------------------
+#-- Flags
+__logger_file_set__ = False #: If a file setup for logger
+__require_root__ = False    #: Does script require root
+#------------------------------------------------------------------------------
+#-- Load in environment variables, or set defaults
+__default_dsf__ = os.getenv('DEFAULT_TIMESTAMP') if 'DEFAULT_TIMESTAMP' in os.environ else "%Y%m%d-%H%M%S"
+__logger_dsf__ = os.getenv('LOGGER_DSF') if 'LOGGER_DSF' in os.environ else __default_dsf__
+__backup_dsf__ = os.getenv('BACKUP_DSF') if 'BACKUP_DSF' in os.environ else __default_dsf__
+__logger_file__ = os.getenv('LOGGER_FILE') if 'LOGGER_FILE' in os.environ else None
+__logger_lvl__= os.getenv('LOGGER_LVL') if 'LOGGER_LVL' in os.environ else 'info'
 
 EXIT_STATUS = None
-
-
 #==============================================================================
 class _ModOptionParser(optparse.OptionParser):
     """By default format_epilog() strips newlines, we don't want that, os override."""
@@ -194,148 +198,77 @@ def _debug_info():
     logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
 
 
-#=============================================================================={#
-def test_func():
-    """ test function -- will not exist in deployed template """
-    logger = logging.getLogger(__name__)
-    logger.debug('this is a test')
-#}
-class CLIOptions(object):
-    """ """
-    _helprest = False
-    _debug = False
-    _debugfile = None
+#==============================================================================
+def timestamp(time_format=None):
+    import time
+    if time_format is None:
+        time_format = __default_dsf__
+    time_format = time_format.strip('+')
+    return time.strftime(time_format)
 
-    _options = None
-    _args = None
 
-    def __init__(self, args=None):
-        if self._options is not None:
-            raise ValueError('CLIOptions already initialized.')
-        elif args:
-            (self._options, self._arguments) = self._parse_args(args)
-        else:
-            self._options = None
-        if self.helprest:
-            self._print_ReSTHelp()
+#==============================================================================
+def get_temp(directory=None):
+    import tempfile
+    if directory is not None and directory.lower() in 'directory':
+        return tempfile.mkdtemp(prefix='%s-d.' % __cononical_name__)
+    else:
+        return tempfile.mkstemp(prefix='%s.' % __cononical_name__)
 
-    @property
-    def args(self):
-        if self._arguments is not None:
-            return self._arguments
-        return self._args
 
-    @args.setter
-    def args(self, value):
-        self._args = value
-
-    @property
-    def helprest(self):
-        if self._options is not None:
-            return self._options.helprest
-        return self._helprest
-
-    @helprest.setter
-    def helprest(self, value):
-        self._helprest = value
-
-    @property
-    def debug(self):
-        if self._options is not None:
-            return self._options.debug
-        return self._debug
-
-    @debug.setter
-    def debug(self, value):
-        self._debug = value
-
-    @property
-    def debugfile(self):
-        if self._options is not None:
-            return self._options.debugfile
-        return self._debugfile
-
-    @debugfile.setter
-    def debugfile(self, value):
-        self._debugfile = value
-
-    def _print_ReSTHelp(self):
-        self.parser.formatter = _ReSTHelpFormatter()
-        self.parser.usage = '[*options*]'            #: pylint: disable=attribute-defined-outside-init
-                                                #: Not yet sure of a better way to do this...
-        self.parser.description = __description__    #: pylint: disable=attribute-defined-outside-init
-        self.parser.epilog = ('\nAuthor\n------\n\n'
-                         '%s\n'
-                        ) % ('; '.join(__author__))
-        self.parser.print_help()
-        sys.exit(os.EX_OK)
-
-    def _parse_args(self, args):
-        #-- Parse Options (rely on OptionsParser's exception handling)
-        description_string = __synopsis__
-        epilog_string = ('\n%s\n\n'
-                         'Created: %s  Contact: %s\n'
-                         'Revised: %s  Version: %s\n'
-                         '%s, part of %s. Project home: %s\n'
-                        ) % (__description__,
-                             __created__, __contact__,
-                             __revised__, __version__,
-                             __cononical_name__, __project_name__, __project_home__
-                            )
-        usage_string = '%s [options]' % (__basename__)
-        version_string = '%s (%s) %s' % (__cononical_name__, __project_name__, __version__)
-        if __gnu_version__:
-            version_string += ('\nCopyright {{ software_copyright|default("TODO: CHANGEME", true) }}\n'
-                               'License {{ software_license|default("TODO: CHANGEME", true) }}\n'
-                              )
-        parser = _ModOptionParser(version=version_string, usage=usage_string,
-                                  description=description_string, epilog=epilog_string
-                                 )
-        self.parser = parser
-        #-- 'Hidden' options
-        parser.add_option('--help-rest', dest='helprest', action='store_true',
-                          help=optparse.SUPPRESS_HELP, default=False
-                         )
-        parser.add_option('--debug', dest='debug', action='store_true',
-                          help=optparse.SUPPRESS_HELP, default=False
-                         )
-        parser.add_option('--debug-file', dest='debugfile', type='string',
-                          help=optparse.SUPPRESS_HELP
-                         )
-        return parser.parse_args()
+#==============================================================================
+def set_value(file, key, value):
+    pass
 
 
 #==============================================================================
 def CLILogger(options):
+
     if options.debug:
-        LEVEL = logging.DEBUG
-        FORMATTER = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s',
-                                      '%Y%m%d-%H%M'
+        level = logging.DEBUG
+        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s',
+                                      __logger_dsf__
                                      )
     else:
-        LEVEL = logging.INFO
-        FORMATTER = logging.Formatter('%(message)s')
+        if __logger_lvl__.isdigit():
+            if int(__logger_lvl__) > 49:
+                level = logging.CRITICAL
+            elif int(__logger_lvl__) < 10:
+                level = logging.NOTSET
+            else:
+                level = (int(__logger_lvl__)) //10 * 10
+        else:
+            level = logging.getLevelName(__logger_lvl__.upper())
+        formatter = logging.Formatter('%(message)s')
+
+    #-- Yes, we are going to ignore unknown values by setting to INFO
+    if isinstance(level, str) and level.startswith('Level'):
+        level = logging.INFO
+
     logger = logging.getLogger(__name__) #: pylint: disable=invalid-name
                                          #: lower-case is better here
-    logger.setLevel(LEVEL)
+    logger.setLevel(level)
 
     #-- Console output
-    CONSOLE = logging.StreamHandler()
-    CONSOLE.setLevel(LEVEL)
-    CONSOLE.setFormatter(FORMATTER)
-    logger.addHandler(CONSOLE)
+    console = logging.StreamHandler()
+    console.setLevel(level)
+    console.setFormatter(formatter)
+    logger.addHandler(console)
 
     #-- File output
-    if options.debug and options.debugfile:
+    if __logger_file__:
+        if os.path.isfile(__logger_file__):
+            os.rename(__logger_file__, '%s.%s' % (__logger_file__,timestamp(__backup_dsf__)))
         #: NOTE: In Python >= 2.6 normally I give FileHandler 'delay="true"'
-        LOGFILE = logging.FileHandler(options.debugfile)
-        LOGFILE.setLevel(LEVEL)
-        FORMATTER = logging.Formatter(
+        logfile = logging.FileHandler(__logger_file__)
+        logfile.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
             '%(asctime)s.%(msecs)d:%(levelno)s:%(name)s.%(funcName)s:%(lineno)d:%(message)s',
-            '%Y%m%d-%H%M'
+            __logger_dsf__
             )
-        LOGFILE.setFormatter(FORMATTER)
-        logger.addHandler(LOGFILE)
+        logfile.setFormatter(formatter)
+        logger.addHandler(logfile)
+        __logger_file_set__ = True
 
     if options.debug:
         _debug_info()
@@ -382,6 +315,98 @@ def which(program):
 
 
 #==============================================================================
+class CLIOptions(object):
+    """ """
+    _helprest = False
+    _debug = False
+
+    _options = None
+    _args = None
+
+    def __init__(self, args=None):
+        if self._options is not None:
+            raise ValueError('CLIOptions already initialized.')
+        elif args:
+            (self._options, self._arguments) = self._parse_args(args)
+        else:
+            self._options = None
+        if self.helprest:
+            self._print_ReSTHelp()
+
+    @property
+    def args(self):
+        if self._arguments is not None:
+            return self._arguments
+        return self._args
+
+    @args.setter
+    def args(self, value):
+        self._args = value
+
+    @property
+    def helprest(self):
+        if self._options is not None:
+            return self._options.helprest
+        return self._helprest
+
+    @helprest.setter
+    def helprest(self, value):
+        self._helprest = value
+
+    @property
+    def debug(self):
+        if self._options is not None:
+            return self._options.debug
+        return self._debug
+
+    @debug.setter
+    def debug(self, value):
+        self._debug = value
+
+    def _print_ReSTHelp(self):
+        self.parser.formatter = _ReSTHelpFormatter()
+        self.parser.usage = '[*options*]'            #: pylint: disable=attribute-defined-outside-init
+                                                #: Not yet sure of a better way to do this...
+        self.parser.description = __description__    #: pylint: disable=attribute-defined-outside-init
+        self.parser.epilog = ('\nAuthor\n------\n\n'
+                         '%s\n'
+                        ) % ('; '.join(__author__))
+        self.parser.print_help()
+        sys.exit(os.EX_OK)
+
+    def _parse_args(self, args):
+        #-- Parse Options (rely on OptionsParser's exception handling)
+        description_string = __synopsis__
+        epilog_string = ('\n%s\n\n'
+                         'Created: %s  Contact: %s\n'
+                         'Revised: %s  Version: %s\n'
+                         '%s, part of %s. Project home: %s\n'
+                        ) % (__description__,
+                             __created__, __contact__,
+                             __revised__, __version__,
+                             __cononical_name__, __project_name__, __project_home__
+                            )
+        usage_string = '%s [options]' % (__basename__)
+        version_string = '%s (%s) %s' % (__cononical_name__, __project_name__, __version__)
+        if __gnu_version__:
+            version_string += ('\nCopyright {{ software_copyright|default("TODO: CHANGEME", true) }}\n'
+                               'License {{ software_license|default("TODO: CHANGEME", true) }}\n'
+                              )
+        parser = _ModOptionParser(version=version_string, usage=usage_string,
+                                  description=description_string, epilog=epilog_string
+                                 )
+        self.parser = parser
+        #-- 'Hidden' options
+        parser.add_option('--help-rest', dest='helprest', action='store_true',
+                          help=optparse.SUPPRESS_HELP, default=False
+                         )
+        parser.add_option('--debug', dest='debug', action='store_true',
+                          help=optparse.SUPPRESS_HELP, default=False
+                         )
+        return parser.parse_args()
+
+
+#==============================================================================
 def main(options, logger):
     """ This is where the action takes place """
     logger.debug('Starting main()')
@@ -392,7 +417,20 @@ def main(options, logger):
     logger.error('error message')
     logger.critical('critical message')
 
-    test_func()
+    print timestamp()
+    print 'FILE'
+    tempfile = get_temp()
+    print tempfile
+    os.remove(tempfile[1])
+    print 'DIR'
+    tempdir = get_temp('dir')
+    print tempdir
+    os.rmdir(tempdir)
+    print 'THING'
+    tempthing = get_temp('dat')
+    print tempthing
+    os.remove(tempthing[1])
+
     #}
 
 
@@ -402,6 +440,10 @@ if __name__ == '__main__':
     #   Parsing options here as we need them to setup the logger.
     options = CLIOptions(sys.argv[1:])
     logger = CLILogger(options)
+    if __require_root__ and os.getegid() != 0:
+        logger.error('Must be run as root.')
+        sys.exit(77)
+
     try:
         main(options, logger)
     except KeyboardInterrupt: # Catches Ctrl-C
