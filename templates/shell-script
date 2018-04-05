@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180403-162624' #: date of most recent revision
+__revised__='20180405-114454' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -41,10 +41,11 @@ __author__='{{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default("T
 __created__='{{ date|default("TODO: CHANGEME", true) }}'               #: date script originlly created
 __copyright__='{{ software_copyright|default("TODO: CHANGEME", true) }}' #: Copyright short name
 __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
+__gnu_version__='False'  #: If True print GNU version string (which includes copyright/license)
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.1.0'  #: version of template file used
+__template_version__='2.2.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -171,16 +172,12 @@ _version() {
     #:
     #: .. note::
     #:     GNU guidelines dictate adding copyright and license info
-    #:     (see commented code.)
-    #:
-    #: .. warning::
-    #:     HOWEVER, this may not always be desierable.
-    #:     If not, REMOVE these lines -- do NOT leave them commented!
     #:"""
     printf '%s (%s) %s\n' "${__cononical_name__}" "${__project_name__}" "${__version__}"
-    #-- TODO: UPDATE license - a boilerplate notice should go here as well
-    # printf '%s\n' "${__copyright__}"
-    # printf '%s\n' "${__license__}"
+    if [ "${__gnu_version__}" = 'True' ]; then
+        printf 'Copyright %s\n' "${__copyright__}"
+        printf 'License %s\n' "${__license__}"
+    fi
 
     return
 }
@@ -230,6 +227,8 @@ _exit_trap() {
     #:
     #: :param int trap_line: Line number trap caught on
     #: :param str trap_name: Short name of trap
+    #: .. warning::
+    #:     This function calls exit_error, which exits the script
     #:"""
     exit_error "${?}" "caught trap ${2} at line ${1}; exiting"
 }
@@ -332,6 +331,8 @@ exit_clean() {
     #: .. function:: exit_clean()
     #:
     #: Clean up everything and exit gracefully
+    #: .. warning::
+    #:     This function exits the script
     #:"""
     [ "${__script_debug__}" = true ] && {
         set +o xtrace
