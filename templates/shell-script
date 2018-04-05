@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180405-114454' #: date of most recent revision
+__revised__='20180405-155457' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -56,10 +56,10 @@ __logger_file_set__='false' #: If a file setup for logger
 __require_root__='false'    #: Does script require root
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
-__logger_file__=${LOGGER_FILE:="nil"}                  #: Path & name of log file to use
+__default_dsf__=${DEFAULT_TIMESTAMP:="+%Y%m%d-%H%M%S"} #: Default format for 'date' command
 __logger_dsf__=${LOGGER_DSF:="+%Y%m%d-%H%M%S"}         #: Debug logging output format for 'date' command
 __backup_dsf__=${BACKUP_DSF:="+%Y%m%d-%H%M%S"}         #: Backup file format for 'date' command
-__default_dsf__=${DEFAULT_TIMESTAMP:="+%Y%m%d-%H%M%S"} #: Default format for 'date' command
+__logger_file__=${LOGGER_FILE:="nil"}                  #: Path & name of log file to use
 case "$(printf '%s' "${LOGGER_LVL:="info"}" | tr '[:upper:]' '[:lower:]')" in
     debug)          __logger_lvl__=10 ;;
     info)           __logger_lvl__=20 ;;
