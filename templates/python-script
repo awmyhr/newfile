@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-143417' #: date of most recent revision
+__revised__ = '20180406-162522' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -74,7 +74,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.0.0-alpha-03'              #: version of template file used
+__template_version__ = '2.0.0-rc-01'              #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -199,7 +199,8 @@ def _debug_info():
 #==============================================================================
 def timestamp(time_format=None):
     """ Return date in specified format """
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+    if 'logger' in globals():
+        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     import time
     if time_format is None:
         time_format = __default_dsf__
@@ -210,7 +211,8 @@ def timestamp(time_format=None):
 #==============================================================================
 def get_temp(directory=None):
     """ Creates a temporary file (or directory), returning the path. Defaults to file. """
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+    if 'logger' in globals():
+        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     import tempfile
     if directory is not None and directory.lower() in 'directory':
         return tempfile.mkdtemp(prefix='%s-d.' % __cononical_name__)
@@ -220,15 +222,15 @@ def get_temp(directory=None):
 #==============================================================================
 def set_value(file, key, value):
     """ Set ENV-style vars in files """
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    pass
+    if 'logger' in globals():
+        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
 
 
 #==============================================================================
 def CLILogger(opts):
     """ Set up the Logger """
-   #  logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-
+    if 'logger' in globals():
+        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     if opts.debug:
         level = logging.DEBUG
         formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s',
@@ -272,6 +274,7 @@ def CLILogger(opts):
             )
         logfile.setFormatter(formatter)
         new_logger.addHandler(logfile)
+        global __logger_file_set__ #: pylint: disable=global-statement
         __logger_file_set__ = True
 
     if opts.debug:
@@ -331,12 +334,10 @@ class CLIOptions(object):
     def __init__(self, args=None):
         if self._options is not None:
             raise ValueError('CLIOptions already initialized.')
-        elif args:
-            (self._options, self._arguments) = self._parse_args(args)
         else:
-            self._options = None
+            (self._options, self._arguments) = self._parse_args(args)
         if self.helprest:
-            self._print_ReSTHelp()
+            self._print_rest_help()
 
     @property
     def args(self):
@@ -371,7 +372,7 @@ class CLIOptions(object):
     def debug(self, value):
         self._debug = value
 
-    def _print_ReSTHelp(self):
+    def _print_rest_help(self):
         self.parser.formatter = _ReSTHelpFormatter()
         self.parser.usage = '[*options*]'            #: pylint: disable=attribute-defined-outside-init
                                                 #: Not yet sure of a better way to do this...
@@ -411,17 +412,19 @@ class CLIOptions(object):
         parser.add_option('--debug', dest='debug', action='store_true',
                           help=optparse.SUPPRESS_HELP, default=False
                          )
-        return parser.parse_args()
+        return parser.parse_args(args)
 
 
 #==============================================================================
-def main(options, logger):
-    """ This is where the action takes place """
+def main():
+    """ This is where the action takes place
+        We expect options and logger to be global
+    """
     logger.debug('Starting main()')
     #-- TODO: Do something more interesting here...{#
     logger.debug('debug message')
     logger.info('info message')
-    logger.warn('warn message')
+    logger.warning('warn message')
     logger.error('error message')
     logger.critical('critical message')
 
@@ -438,6 +441,7 @@ def main(options, logger):
     tempthing = get_temp('dat')
     print(tempthing)
     os.remove(tempthing[1])
+    print(__logger_file_set__)
     raise OSError('Testing 1 2 3')
     #}
 
@@ -459,7 +463,7 @@ if __name__ == '__main__':
     #         the exception use "_, error, _ = sys.exc_info()". HOWEVER, pylint
     #         will no longer be able to warn on object members...
     try:
-        main(options, logger)
+        main()
     except KeyboardInterrupt: # Catches Ctrl-C
         logger.debug('Caught Ctrl-C')
         EXIT_STATUS = 130
