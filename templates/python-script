@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-162522' #: date of most recent revision
+__revised__ = '20180406-165817' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -325,11 +325,9 @@ def which(program):
 #==============================================================================
 class CLIOptions(object):
     """ Parse the options and put them into an object """
-    _helprest = False
-    _debug = False
 
     _options = None
-    _args = None
+    _arguments = None
 
     def __init__(self, args=None):
         if self._options is not None:
@@ -344,33 +342,21 @@ class CLIOptions(object):
         """ Class property """
         if self._arguments is not None:
             return self._arguments
-        return self._args
-
-    @args.setter
-    def args(self, value):
-        self._args = value
+        return None
 
     @property
     def helprest(self):
         """ Class property """
         if self._options is not None:
             return self._options.helprest
-        return self._helprest
-
-    @helprest.setter
-    def helprest(self, value):
-        self._helprest = value
+        return None
 
     @property
     def debug(self):
         """ Class property """
         if self._options is not None:
             return self._options.debug
-        return self._debug
-
-    @debug.setter
-    def debug(self, value):
-        self._debug = value
+        return None
 
     def _print_rest_help(self):
         self.parser.formatter = _ReSTHelpFormatter()
@@ -428,21 +414,22 @@ def main():
     logger.error('error message')
     logger.critical('critical message')
 
-    print(timestamp())
-    print('FILE')
-    tempfile = get_temp()
-    print(tempfile)
-    os.remove(tempfile[1])
-    print('DIR')
-    tempdir = get_temp('dir')
-    print(tempdir)
-    os.rmdir(tempdir)
-    print('THING')
-    tempthing = get_temp('dat')
-    print(tempthing)
-    os.remove(tempthing[1])
-    print(__logger_file_set__)
-    raise OSError('Testing 1 2 3')
+    print options._options
+    # print(timestamp())
+    # print('FILE')
+    # tempfile = get_temp()
+    # print(tempfile)
+    # os.remove(tempfile[1])
+    # print('DIR')
+    # tempdir = get_temp('dir')
+    # print(tempdir)
+    # os.rmdir(tempdir)
+    # print('THING')
+    # tempthing = get_temp('dat')
+    # print(tempthing)
+    # os.remove(tempthing[1])
+    # print(__logger_file_set__)
+    # raise OSError('Testing 1 2 3')
     #}
 
 
