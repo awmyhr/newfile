@@ -31,11 +31,11 @@
 """
 #===============================================================================
 #-- Standard Imports
-#-- NOTE: We use optparse for compatibility with python < 2.7 as (the superior)
+#-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
 import logging      #: Python's standard logging facilities
-import optparse     #: Argument parsing
+import optparse     #: pylint: disable=deprecated-module
 import os           #: Misc. OS interfaces
 import sys          #: System-specific parameters & functions
 # import traceback    #: Print/retrieve a stack traceback
@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-114452' #: date of most recent revision
+__revised__ = '20180406-143417' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -225,11 +225,11 @@ def set_value(file, key, value):
 
 
 #==============================================================================
-def CLILogger(options):
+def CLILogger(opts):
     """ Set up the Logger """
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+   #  logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
 
-    if options.debug:
+    if opts.debug:
         level = logging.DEBUG
         formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s',
                                       __logger_dsf__
@@ -250,15 +250,14 @@ def CLILogger(options):
     if isinstance(level, str) and level.startswith('Level'):
         level = logging.INFO
 
-    logger = logging.getLogger(__name__) #: pylint: disable=invalid-name
-                                         #: lower-case is better here
-    logger.setLevel(level)
+    new_logger = logging.getLogger(__name__)
+    new_logger.setLevel(level)
 
     #-- Console output
     console = logging.StreamHandler()
     console.setLevel(level)
     console.setFormatter(formatter)
-    logger.addHandler(console)
+    new_logger.addHandler(console)
 
     #-- File output
     if __logger_file__:
@@ -272,14 +271,14 @@ def CLILogger(options):
             __logger_dsf__
             )
         logfile.setFormatter(formatter)
-        logger.addHandler(logfile)
+        new_logger.addHandler(logfile)
         __logger_file_set__ = True
 
-    if options.debug:
+    if opts.debug:
         _debug_info()
         print('\n----- start -----\n')
 
-    return logger
+    return new_logger
 
 
 #==============================================================================
@@ -297,7 +296,6 @@ def which(program):
         http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
     """
     logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger = logging.getLogger(__name__)
     logger.debug('Looking for command: %s', program)
     def _is_exe(fpath):
         """ Private test for executeable """
@@ -440,7 +438,7 @@ def main(options, logger):
     tempthing = get_temp('dat')
     print(tempthing)
     os.remove(tempthing[1])
-
+    raise OSError('Testing 1 2 3')
     #}
 
 
@@ -468,7 +466,7 @@ if __name__ == '__main__':
     except SystemExit as error: # Catches sys.exit()
         #_, error, _ = sys.exc_info()
         logger.debug('Caught SystemExit')
-        logger.warning('%s: [SystemExit] %s', __basename__, error.strerror)
+        logger.warning('%s: [SystemExit] %s', __basename__, error)
         if error.errno is None:
             EXIT_STATUS = 10
         else:
@@ -477,31 +475,31 @@ if __name__ == '__main__':
         #_, error, _ = sys.exc_info()
         logger.debug('Caught IOError')
         if error.errno is None:
-            logger.critical('%s: [IOError]: %s', __basename__, error.message)
+            logger.critical('%s: [IOError]: %s', __basename__, error)
             EXIT_STATUS = 10
         elif error.errno == 2:                #: No such file/directory
             logger.critical('%s: [IOError] %s: %s', __basename__,
-                            error.strerror, error.filename
+                            error, error.filename
                            )
             EXIT_STATUS = os.EX_UNAVAILABLE
         elif error.errno == 13:                #: Permission Denied
             logger.critical('%s: [IOError] %s: %s', __basename__,
-                            error.strerror, error.filename
+                            error, error.filename
                            )
             EXIT_STATUS = os.EX_NOPERM
         else:
-            logger.critical('%s: [IOError] %s', __basename__, error.strerror)
+            logger.critical('%s: [IOError] %s', __basename__, error)
             EXIT_STATUS = error.errno
     except OSError as error:
         #_, error, _ = sys.exc_info()
         logger.debug('Caught OSError')
         if error.errno == 2:                #: No such file/directory
             logger.critical('%s: [OSError] %s: %s', __basename__,
-                            error.strerror, error.filename
+                            error, error.filename
                            )
             EXIT_STATUS = os.EX_UNAVAILABLE
         else:
-            logger.critical('%s: [OSError] %s', __basename__, error.strerror)
+            logger.critical('%s: [OSError] %s', __basename__, error)
             EXIT_STATUS = error.errno
     except Exception as error:
         #_, error, _ = sys.exc_info()
