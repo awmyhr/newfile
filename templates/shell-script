@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180405-155457' #: date of most recent revision
+__revised__='20180406-092340' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -45,7 +45,7 @@ __gnu_version__='False'  #: If True print GNU version string (which includes cop
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.2.0'  #: version of template file used
+__template_version__='2.2.1'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -247,7 +247,7 @@ logger() {
     #:     Kumarappan), but I think there is very little left of the original
     #:     code here. See: https://github.com/nk412/tinylogger
     #:"""
-    case "$(printf '%s' "${1}")" in 
+    case "$(printf '%s' "${1}")" in
         debug)          __logger_action_tag='DEBUG'    ; __logger_log_level_th=10 ;;
         info)           __logger_action_tag='INFO'     ; __logger_log_level_th=20 ;;
         warn|warning)   __logger_action_tag='WARNING'  ; __logger_log_level_th=30 ;;
@@ -375,7 +375,7 @@ get_temp() {
             __get_temp_path="/tmp/${__cononical_name__}-d.${$}"
             mkdir "${__get_temp_path}" || return "${?}"
         fi
-        printf "${__get_temp_path}"
+        printf '%s' "${__get_temp_path}"
     fi
 
     return
@@ -391,9 +391,9 @@ is_in_string() {
     #: :param str needle:   Substring to search for
     #: :param str heystack: String to search in
     #:"""
-    case "${2}" in 
-        *${1}*) return 0 ;; 
-        *)      return 1 ;; 
+    case "${2}" in
+        *${1}*) return 0 ;;
+        *)      return 1 ;;
     esac ;
 }
 
@@ -429,7 +429,7 @@ identify_platform() {
     #: Identify underlining 'hardware' platform and return tag.
     #:"""
     if [ -f '/sys/devices/virtual/dmi/id/sys_vendor' ] ; then
-        __identify_platform_sys_vendor="$(</sys/devices/virtual/dmi/id/sys_vendor)"
+        __identify_platform_sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor)"
         case "${__identify_platform_sys_vendor}" in
             'Microsoft Corporation') printf 'az' ;;
             'VMware, Inc.')          printf 'vm' ;;
@@ -439,7 +439,7 @@ identify_platform() {
     else
         printf 'unknown'
     fi
-    
+
     return
 }
 
@@ -509,7 +509,7 @@ trap '_exit_trap ${LINENO} TERM' TERM
 trap '_exit_trap ${LINENO} HUP'  HUP
 
 #-- Process options (ignore --debug, as we already checked)
-#   NOTE: this is not optimal, but is an attempt to keep things POSIX 
+#   NOTE: this is not optimal, but is an attempt to keep things POSIX
 #         compliant. If you are expecting arguments instead of params,
 #         be sure to assign them... somehow...
 # {% raw %}
