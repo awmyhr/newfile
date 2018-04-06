@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-101211' #: date of most recent revision
+__revised__ = '20180406-114452' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -170,8 +170,9 @@ class _ReSTHelpFormatter(optparse.HelpFormatter):
 #==============================================================================
 def _debug_info():
     """ Provides meta info for debug-level output """
-    import platform #: Easily get platforms identifying info
     logger = logging.getLogger(__name__)
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+    import platform #: Easily get platforms identifying info
     logger.debug('Cononical: %s', __cononical_name__)
     logger.debug('Abs Path:  %s', os.path.abspath(sys.argv[0]))
     logger.debug('Full Args: %s', ' '.join(sys.argv[:]))
@@ -198,6 +199,7 @@ def _debug_info():
 #==============================================================================
 def timestamp(time_format=None):
     """ Return date in specified format """
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     import time
     if time_format is None:
         time_format = __default_dsf__
@@ -208,6 +210,7 @@ def timestamp(time_format=None):
 #==============================================================================
 def get_temp(directory=None):
     """ Creates a temporary file (or directory), returning the path. Defaults to file. """
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     import tempfile
     if directory is not None and directory.lower() in 'directory':
         return tempfile.mkdtemp(prefix='%s-d.' % __cononical_name__)
@@ -216,12 +219,15 @@ def get_temp(directory=None):
 
 #==============================================================================
 def set_value(file, key, value):
+    """ Set ENV-style vars in files """
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     pass
 
 
 #==============================================================================
 def CLILogger(options):
     """ Set up the Logger """
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
 
     if options.debug:
         level = logging.DEBUG
@@ -290,6 +296,7 @@ def which(program):
         Originally found this here:
         http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
     """
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
     logger = logging.getLogger(__name__)
     logger.debug('Looking for command: %s', program)
     def _is_exe(fpath):
@@ -335,6 +342,7 @@ class CLIOptions(object):
 
     @property
     def args(self):
+        """ Class property """
         if self._arguments is not None:
             return self._arguments
         return self._args
@@ -345,6 +353,7 @@ class CLIOptions(object):
 
     @property
     def helprest(self):
+        """ Class property """
         if self._options is not None:
             return self._options.helprest
         return self._helprest
@@ -355,6 +364,7 @@ class CLIOptions(object):
 
     @property
     def debug(self):
+        """ Class property """
         if self._options is not None:
             return self._options.debug
         return self._debug
@@ -444,20 +454,27 @@ if __name__ == '__main__':
         logger.error('Must be run as root.')
         sys.exit(77)
 
+    #-- NOTE: "except Exception as variable:" syntax was added in 2.6, previously
+    #         one would use "except Exception, variable:", but that is not
+    #         compatible with 3.x. In order to be compatible with 2.5 (for RHEL 5)
+    #         and forward, we use "execpt Exception:", then on the first line of
+    #         the exception use "_, error, _ = sys.exc_info()". HOWEVER, pylint
+    #         will no longer be able to warn on object members...
     try:
         main(options, logger)
     except KeyboardInterrupt: # Catches Ctrl-C
         logger.debug('Caught Ctrl-C')
         EXIT_STATUS = 130
     except SystemExit as error: # Catches sys.exit()
+        #_, error, _ = sys.exc_info()
         logger.debug('Caught SystemExit')
         logger.warning('%s: [SystemExit] %s', __basename__, error.strerror)
         if error.errno is None:
             EXIT_STATUS = 10
         else:
             EXIT_STATUS = error.errno
-    #-- NOTE: "except Exception as variable:" syntax was added in 2.6
     except IOError as error:
+        #_, error, _ = sys.exc_info()
         logger.debug('Caught IOError')
         if error.errno is None:
             logger.critical('%s: [IOError]: %s', __basename__, error.message)
@@ -476,6 +493,7 @@ if __name__ == '__main__':
             logger.critical('%s: [IOError] %s', __basename__, error.strerror)
             EXIT_STATUS = error.errno
     except OSError as error:
+        #_, error, _ = sys.exc_info()
         logger.debug('Caught OSError')
         if error.errno == 2:                #: No such file/directory
             logger.critical('%s: [OSError] %s: %s', __basename__,
@@ -486,8 +504,9 @@ if __name__ == '__main__':
             logger.critical('%s: [OSError] %s', __basename__, error.strerror)
             EXIT_STATUS = error.errno
     except Exception as error:
+        #_, error, _ = sys.exc_info()
         logger.debug('Caught Exception')
-        logger.critical('%s: %s' % (__basename__, error))
+        logger.critical('%s: %s', __basename__, error)
         EXIT_STATUS = 10
     else:
         logger.debug('main() exited cleanly.')
