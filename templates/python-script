@@ -1,4 +1,4 @@
-#!/usr/bin/python -tt
+#!/usr/bin/python2 -tt
 # -*- coding: utf-8 -*-
 # ^^-- use utf-8 strings by default
 #-- NOTE: Tabs and spaces do NOT mix!! '-tt' will flag violations as an error.{#
@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-092048' #: date of most recent revision
+__revised__ = '20180406-101211' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -184,14 +184,12 @@ def _debug_info():
     logger.debug('Project:   %s', __project_name__)
     logger.debug('Project Home: %s', __project_home__)
     logger.debug('Template Version: %s', __template_version__)
-    logger.debug('System:    %s',
-                 platform.system_alias(platform.system(),
-                                       platform.release(),
-                                       platform.version()
-                                      )
+    logger.debug('System:    %s', platform.system_alias(platform.system(),
+                                                        platform.release(),
+                                                        platform.version()
+                                                       )
                 )
-    if platform.system() in 'Linux':
-        logger.debug('Distro:    %s', platform.linux_distribution())
+    logger.debug('Platform:  %s', platform.platform())
     logger.debug('Hostname:  %s', platform.node())
     logger.debug('[res]uid:  %s', os.getresuid())
     logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
@@ -276,6 +274,7 @@ def CLILogger(options):
         print('\n----- start -----\n')
 
     return logger
+
 
 #==============================================================================
 def which(program):
