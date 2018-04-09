@@ -31,11 +31,12 @@
 """
 #===============================================================================
 #-- Standard Imports
+from __future__ import (absolute_import, division, print_function)
 #-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
-import logging      #: Python's standard logging facilities
 import optparse     #: pylint: disable=deprecated-module
+import logging      #: Python's standard logging facilities
 import os           #: Misc. OS interfaces
 import sys          #: System-specific parameters & functions
 # import traceback    #: Print/retrieve a stack traceback
@@ -59,7 +60,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180409-103043' #: date of most recent revision
+__revised__ = '20180409-105705' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -74,7 +75,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.0.0-rc-02'              #: version of template file used
+__template_version__ = '2.0.0-rc-03'              #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -334,8 +335,6 @@ class CLIOptions(object):
             raise ValueError('CLIOptions already initialized.')
         else:
             (self._options, self._arguments) = self._parse_args(args)
-        if self.helprest:
-            self._print_rest_help()
 
     @property
     def args(self):
@@ -345,29 +344,11 @@ class CLIOptions(object):
         return None
 
     @property
-    def helprest(self):
-        """ Class property """
-        if self._options is not None:
-            return self._options.helprest
-        return None
-
-    @property
     def debug(self):
         """ Class property """
         if self._options is not None:
             return self._options.debug
         return None
-
-    def _print_rest_help(self):
-        self.parser.formatter = _ReSTHelpFormatter()
-        self.parser.usage = '[*options*]'            #: pylint: disable=attribute-defined-outside-init
-                                                #: Not yet sure of a better way to do this...
-        self.parser.description = __description__    #: pylint: disable=attribute-defined-outside-init
-        self.parser.epilog = ('\nAuthor\n------\n\n'
-                              '%s\n'
-                             ) % ('; '.join(__author__))
-        self.parser.print_help()
-        sys.exit(os.EX_OK)
 
     def _parse_args(self, args):
         #-- Parse Options (rely on OptionsParser's exception handling)
@@ -389,14 +370,30 @@ class CLIOptions(object):
                                   description=description_string, epilog=epilog_string
                                  )
         self.parser = parser
-        #-- 'Hidden' options
+        #-- Put visible options here (don't forget @property if needed).
+
+        #-- Put hidden options here (don't forget @property if needed).
         parser.add_option('--help-rest', dest='helprest', action='store_true',
                           help=optparse.SUPPRESS_HELP, default=False
                          )
         parser.add_option('--debug', dest='debug', action='store_true',
                           help=optparse.SUPPRESS_HELP, default=False
                          )
-        return parser.parse_args(args)
+
+        parsed_opts, parsed_args = parser.parse_args(args)
+        if parsed_opts.helprest:
+            parser.formatter = _ReSTHelpFormatter()
+            parser.usage = '[*options*]'            #: pylint: disable=attribute-defined-outside-init
+                                                    #: Not yet sure of a better way to do this...
+            parser.description = __description__    #: pylint: disable=attribute-defined-outside-init
+            parser.epilog = ('\nAuthor\n------\n\n'
+                                  '%s\n'
+                                 ) % ('; '.join(__author__))
+            parser.print_help()
+            sys.exit(os.EX_OK)
+        #-- Put any option validation here...
+
+        return parsed_opts, parsed_args
 
 
 #==============================================================================
