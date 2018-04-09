@@ -67,7 +67,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180409-135405' #: date of most recent revision
+__revised__ = '20180409-144722' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -82,7 +82,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.0.0'  #: version of template file used
+__template_version__ = '2.0.1'  #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -200,7 +200,7 @@ def timestamp(time_format=None):
 #==============================================================================
 def get_temp(directory=None):
     """ Creates a temporary file (or directory), returning the path.
-        Defaults to file. 
+        Defaults to file.
 
     Args:
         program (str): Name of program to find.
@@ -220,7 +220,7 @@ def get_temp(directory=None):
 
 #==============================================================================
 def set_value(filename, key, value):
-    """ Add or change a KEY to a VALUE in a FILE, creating FILE if necessary. 
+    """ Add or change a KEY to a VALUE in a FILE, creating FILE if necessary.
 
     Args:
         filename (str): File to create/modify
@@ -237,7 +237,7 @@ def set_value(filename, key, value):
     raise NotImplementedError('TODO: implement set_value().')
 
 #==============================================================================
-def CLILogger(debug=False):
+def CLILogger(debug=False): #: pylint: disable=invalid-name
     """ Set up Python's Logging
 
     Args:
@@ -357,7 +357,7 @@ def which(program):
 
 #==============================================================================
 class CLIOptions(object):
-    """ Parse the options and put them into an object 
+    """ Parse the options and put them into an object
 
         Returns:
             A CLIOptions object.
