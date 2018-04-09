@@ -31,7 +31,14 @@
 """
 #===============================================================================
 #-- Standard Imports
-from __future__ import (absolute_import, division, print_function)
+#-- NOTE: See __future__ documentation at https://docs.python.org/2/library/__future__.html
+#--       This allows us to write Python 3 code for older version.
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+#-- These may break 2.5 compatibility
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
 #-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
@@ -60,7 +67,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180409-105705' #: date of most recent revision
+__revised__ = '20180409-131942' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -75,7 +82,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.0.0-rc-03'              #: version of template file used
+__template_version__ = '2.0.0-rc-05'              #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -169,35 +176,6 @@ class _ReSTHelpFormatter(optparse.HelpFormatter):
 
 
 #==============================================================================
-def _debug_info():
-    """ Provides meta info for debug-level output """
-    logger = logging.getLogger(__name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    import platform #: Easily get platforms identifying info
-    logger.debug('Cononical: %s', __cononical_name__)
-    logger.debug('Abs Path:  %s', os.path.abspath(sys.argv[0]))
-    logger.debug('Full Args: %s', ' '.join(sys.argv[:]))
-    logger.debug('Python:    %s (%s)', sys.executable, platform.python_version())
-    logger.debug('Version:   %s', __version__)
-    logger.debug('Created:   %s', __created__)
-    logger.debug('Revised:   %s', __revised__)
-    logger.debug('Coder(s):  %s', __author__)
-    logger.debug('Contact:   %s', __contact__)
-    logger.debug('Project:   %s', __project_name__)
-    logger.debug('Project Home: %s', __project_home__)
-    logger.debug('Template Version: %s', __template_version__)
-    logger.debug('System:    %s', platform.system_alias(platform.system(),
-                                                        platform.release(),
-                                                        platform.version()
-                                                       )
-                )
-    logger.debug('Platform:  %s', platform.platform())
-    logger.debug('Hostname:  %s', platform.node())
-    logger.debug('[res]uid:  %s', os.getresuid())
-    logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
-
-
-#==============================================================================
 def timestamp(time_format=None):
     """ Return date in specified format """
     if 'logger' in globals():
@@ -221,18 +199,20 @@ def get_temp(directory=None):
 
 
 #==============================================================================
-def set_value(file, key, value):
+def set_value(filename, key, value):
     """ Set ENV-style vars in files """
     if 'logger' in globals():
         logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        logger.debug('Passed: file: %s, key: %s, value: %s', filename, key, value)
 
 
 #==============================================================================
-def CLILogger(opts):
+def CLILogger(debug=False):
     """ Set up the Logger """
-    if 'logger' in globals():
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    if opts.debug:
+    new_logger = logging.getLogger(__name__)
+    new_logger.setLevel(logging.DEBUG)
+
+    if debug:
         level = logging.DEBUG
         formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s',
                                       __logger_dsf__
@@ -247,14 +227,10 @@ def CLILogger(opts):
                 level = (int(__logger_lvl__)) //10 * 10
         else:
             level = logging.getLevelName(__logger_lvl__.upper())
+        #-- Yes, we are going to ignore unknown values by setting to INFO
+        if isinstance(level, str) and level.startswith('Level'):
+            level = logging.INFO
         formatter = logging.Formatter('%(message)s')
-
-    #-- Yes, we are going to ignore unknown values by setting to INFO
-    if isinstance(level, str) and level.startswith('Level'):
-        level = logging.INFO
-
-    new_logger = logging.getLogger(__name__)
-    new_logger.setLevel(level)
 
     #-- Console output
     console = logging.StreamHandler()
@@ -278,8 +254,26 @@ def CLILogger(opts):
         global __logger_file_set__ #: pylint: disable=global-statement
         __logger_file_set__ = True
 
-    if opts.debug:
-        _debug_info()
+    import platform #: Easily get platforms identifying info
+    new_logger.debug('Version:   %s (%s) %s', __cononical_name__, __project_name__, __version__)
+    new_logger.debug('Created:   %s / Revised: %s', __created__, __revised__)
+    new_logger.debug('Abs Path:  %s', os.path.abspath(sys.argv[0]))
+    new_logger.debug('Full Args: %s', ' '.join(sys.argv[:]))
+    new_logger.debug('Python:    %s (%s)', sys.executable, platform.python_version())
+    new_logger.debug('Coder(s):  %s', __author__)
+    new_logger.debug('Contact:   %s', __contact__)
+    new_logger.debug('Project Home: %s', __project_home__)
+    new_logger.debug('Template Version: %s', __template_version__)
+    new_logger.debug('System:    %s', platform.system_alias(platform.system(),
+                                                            platform.release(),
+                                                            platform.version()
+                                                           )
+                    )
+    new_logger.debug('Platform:  %s', platform.platform())
+    new_logger.debug('Hostname:  %s', platform.node())
+    new_logger.debug('[res]uid:  %s', os.getresuid())
+    new_logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
+    if debug:
         print('\n----- start -----\n')
 
     return new_logger
@@ -365,7 +359,7 @@ class CLIOptions(object):
         usage_string = '%s [options]' % (__basename__)
         version_string = '%s (%s) %s' % (__cononical_name__, __project_name__, __version__)
         if __gnu_version__:
-            version_string += ('\nCopyright %s\nLicense %s\n' % (__copyright__, __license__)
+            version_string += '\nCopyright %s\nLicense %s\n' % (__copyright__, __license__)
         parser = _ModOptionParser(version=version_string, usage=usage_string,
                                   description=description_string, epilog=epilog_string
                                  )
@@ -387,8 +381,8 @@ class CLIOptions(object):
                                                     #: Not yet sure of a better way to do this...
             parser.description = __description__    #: pylint: disable=attribute-defined-outside-init
             parser.epilog = ('\nAuthor\n------\n\n'
-                                  '%s\n'
-                                 ) % ('; '.join(__author__))
+                             '%s\n'
+                            ) % ('; '.join(__author__))
             parser.print_help()
             sys.exit(os.EX_OK)
         #-- Put any option validation here...
@@ -409,7 +403,7 @@ def main():
     logger.error('error message')
     logger.critical('critical message')
 
-    print options._options
+    # print (options._options)
     # print(timestamp())
     # print('FILE')
     # tempfile = get_temp()
@@ -433,7 +427,7 @@ if __name__ == '__main__':
     #-- Setting up logger here so we can use them in even of exceptions.
     #   Parsing options here as we need them to setup the logger.
     options = CLIOptions(sys.argv[1:])
-    logger = CLILogger(options)
+    logger = CLILogger(options.debug)
     if __require_root__ and os.getegid() != 0:
         logger.error('Must be run as root.')
         sys.exit(77)
