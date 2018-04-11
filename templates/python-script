@@ -39,6 +39,7 @@ from __future__ import with_statement   #: Clean up some uses of try/except PEP-
 #-- These may break 2.5 compatibility
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+import ConfigParser #: 'Easy' configuration parsing
 #-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
@@ -67,7 +68,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180410-104800' #: date of most recent revision
+__revised__ = '20180411-162553' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
@@ -82,7 +83,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.2.1'  #: version of template file used
+__template_version__ = '2.3.0'  #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -237,7 +238,7 @@ def set_value(filename, key, value):
     raise NotImplementedError('TODO: implement set_value().')
 
 #==============================================================================
-def CLILogger(debug=False):                      #: pylint: disable=invalid-name
+def RunLogger(debug=False):
     ''' Set up Python's Logging
 
     Args:
@@ -357,22 +358,39 @@ def which(program):
 
 
 #==============================================================================
-class CLIOptions(object):
+class RunOptions(object):
     ''' Parse the options and put them into an object
 
         Returns:
-            A CLIOptions object.
+            A RunOptions object.
 
     '''
+    _defaults = {
+        'debug': False,
+    }
 
-    _options = None
     _arguments = None
+    _configs = None
+    _options = None
 
     def __init__(self, args=None):
+        if self._configs is not None:
+            raise ValueError('Configs already initialized.')
+        else:
+            self._configs = self._load_configs()
         if self._options is not None:
-            raise ValueError('CLIOptions already initialized.')
+            raise ValueError('Arguments already initialized.')
         else:
             (self._options, self._arguments) = self._parse_args(args)
+
+    def _load_configs(self):
+        parser = ConfigParser.SafeConfigParser(defaults=self._defaults)
+        parser.read([os.path.expanduser('~/.%s' % __cononical_name__),
+                     '%s.cfg' % __cononical_name__])
+        #-- TODO: Define possible sections
+        if not parser.has_section('debug'):
+            parser.add_section('debug')
+        return parser
 
     @property
     def args(self):
@@ -386,7 +404,7 @@ class CLIOptions(object):
         ''' Class property '''
         if self._options is not None:
             return self._options.debug
-        return None
+        return self._defaults['debug']
 
     @property
     def ansible_called(self):
@@ -410,18 +428,20 @@ class CLIOptions(object):
         if __gnu_version__:
             version_string += '\nCopyright %s\nLicense %s\n' % (__copyright__, __license__)
         parser = _ModOptionParser(version=version_string, usage=usage_string,
-                                  description=description_string, epilog=epilog_string
-                                 )
-        self.parser = parser
-        #-- Put visible options here (don't forget @property if needed).
+                                  description=description_string, epilog=epilog_string)
+        #-- TODO: Add options, also set _default and @property (if needed).
+        #-- Visible Options
+        #   These can *not* be set in a config file
+        #   These could be set in a config file
 
-        #-- Put hidden options here (don't forget @property if needed).
+        #-- Hidden Options
+        #   These can *not* be set in a config file
         parser.add_option('--help-rest', dest='helprest', action='store_true',
-                          help=optparse.SUPPRESS_HELP, default=False
-                         )
+                          help=optparse.SUPPRESS_HELP, default=None)
+        #   These could be set in a config file
         parser.add_option('--debug', dest='debug', action='store_true',
-                          help=optparse.SUPPRESS_HELP, default=False
-                         )
+                          help=optparse.SUPPRESS_HELP,
+                          default=self._configs.get('debug', 'debug'))
 
         parsed_opts, parsed_args = parser.parse_args(args)
         if parsed_opts.helprest:
@@ -429,9 +449,7 @@ class CLIOptions(object):
             parser.usage = '[*options*]'         #: pylint: disable=attribute-defined-outside-init
                                                  #: Not yet sure of a better way to do this...
             parser.description = __description__ #: pylint: disable=attribute-defined-outside-init
-            parser.epilog = ('\nAuthor\n------\n\n'
-                             '%s\n'
-                            ) % ('; '.join(__author__))
+            parser.epilog = '\nAuthor\n------\n\n%s\n' % ('; '.join(__author__))
             parser.print_help()
             sys.exit(os.EX_OK)
         #-- Put any option validation here...
@@ -477,8 +495,8 @@ def main():
 if __name__ == '__main__':
     #-- Setting up logger here so we can use them in even of exceptions.
     #   Parsing options here as we need them to setup the logger.
-    options = CLIOptions(sys.argv[1:])           #: pylint: disable=invalid-name
-    logger = CLILogger(options.debug)            #: pylint: disable=invalid-name
+    options = RunOptions(sys.argv[1:])           #: pylint: disable=invalid-name
+    logger = RunLogger(options.debug)            #: pylint: disable=invalid-name
     if __require_root__ and os.getegid() != 0:
         logger.error('Must be run as root.')
         sys.exit(77)
