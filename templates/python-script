@@ -68,7 +68,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180411-162553' #: date of most recent revision
+__revised__ = '20180413-132913' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
@@ -83,7 +83,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.3.0'  #: version of template file used
+__template_version__ = '2.4.0'  #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -177,6 +177,145 @@ class _ReSTHelpFormatter(optparse.HelpFormatter):
             opts = long_opts + short_opts
 
         return ', '.join(opts)
+
+
+#==============================================================================
+class colors(object):
+    ''' Simple class to ease access to ENV colors '''
+    _colorlist = ['cf_black', 'cf_white', 'cf_orange', 'cf_magenta',
+                  'cf_yellow', 'cf_red', 'cf_purple', 'cf_blue',
+                  'cf_cyan', 'cf_green',
+                  'c_bold', 'c_reset', 'c_undr', 'c_hide',
+                  'c_blik', 'c_revr'
+                 ]
+    _colors = {}
+
+    def __init__(self):
+        for color in self._colorlist:
+            self._colors[color] = os.getenv(color) if color in os.environ else ''
+
+    @classmethod
+    def load_colors(cls):
+        ''' This will load colors from a file someday '''
+        for color in cls._colorlist:
+            cls._colors[color] = os.getenv(color) if color in os.environ else ''
+
+    @classmethod
+    def clear_colors(cls):
+        ''' This will reset all colors to empty '''
+        pass
+
+    @property
+    def black(self):
+        ''' Instance property '''
+        if 'cf_black' in self._colors:
+            return self._colors['cf_black']
+        return ''
+
+    @property
+    def white(self):
+        ''' Instance property '''
+        if 'cf_white' in self._colors:
+            return self._colors['cf_white']
+        return ''
+
+    @property
+    def magenta(self):
+        ''' Instance property '''
+        if 'cf_magenta' in self._colors:
+            return self._colors['cf_magenta']
+        return ''
+
+    @property
+    def orange(self):
+        ''' Instance property '''
+        if 'cf_orange' in self._colors:
+            return self._colors['cf_orange']
+        return ''
+
+    @property
+    def red(self):
+        ''' Instance property '''
+        if 'cf_red' in self._colors:
+            return self._colors['cf_red']
+        return ''
+
+    @property
+    def yellow(self):
+        ''' Instance property '''
+        if 'cf_yellow' in self._colors:
+            return self._colors['cf_yellow']
+        return ''
+
+    @property
+    def purple(self):
+        ''' Instance property '''
+        if 'cf_purple' in self._colors:
+            return self._colors['cf_purple']
+        return ''
+
+    @property
+    def blue(self):
+        ''' Instance property '''
+        if 'cf_blue' in self._colors:
+            return self._colors['cf_blue']
+        return ''
+
+    @property
+    def cyan(self):
+        ''' Instance property '''
+        if 'cf_cyan' in self._colors:
+            return self._colors['cf_cyan']
+        return ''
+
+    @property
+    def green(self):
+        ''' Instance property '''
+        if 'cf_green' in self._colors:
+            return self._colors['cf_green']
+        return ''
+
+    @property
+    def bold(self):
+        ''' Instance property '''
+        if 'c_bold' in self._colors:
+            return self._colors['c_bold']
+        return ''
+
+    @property
+    def reset(self):
+        ''' Instance property '''
+        if 'c_reset' in self._colors:
+            return self._colors['c_reset']
+        return ''
+
+    @property
+    def undr(self):
+        ''' Instance property '''
+        if 'c_undr' in self._colors:
+            return self._colors['c_undr']
+        return ''
+
+    @property
+    def hide(self):
+        ''' Instance property '''
+        if 'c_hide' in self._colors:
+            return self._colors['c_hide']
+        return ''
+
+    @property
+    def blik(self):
+        ''' Instance property '''
+        if 'c_blik' in self._colors:
+            return self._colors['c_blik']
+        return ''
+
+    @property
+    def revr(self):
+        ''' Instance property '''
+        if 'c_revr' in self._colors:
+            return self._colors['c_revr']
+        return ''
 
 
 #==============================================================================
@@ -470,7 +609,12 @@ def main():
     logger.error('error message')
     logger.critical('critical message')
 
-    print('Ansible Called: %s' % options.ansible_called)
+    # print('%sAnsible Called: %s' % (colors._colors['cf_white'], options.ansible_called))
+    c = colors()
+    print('%sAnsible Called: %s%s' % (c.white, c.reset, options.ansible_called))
+    print('%sAnsible Called: %s' % (colors.white, options.ansible_called))
+    # from pprint import pprint
+    # print('%sAnsible Called: %s' % (colors._colors['cf_white'], options.ansible_called))
     # print (options._options)
     # print(timestamp())
     # print('FILE')
