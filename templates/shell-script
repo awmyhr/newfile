@@ -45,7 +45,7 @@ __gnu_version__='False'  #: If True print GNU version string (which includes cop
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.2.1'  #: version of template file used
+__template_version__='2.3.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -209,6 +209,7 @@ _debug_info() {
     logger debug "Template Version: ${__template_version__}"
     logger debug "System:    $(uname -orv)"
     logger debug "Hostname:  $(hostname)"
+    logger debug "Logname:   $(logname)"
     logger debug "[re]uid:   $(id -ur)/$(id -u)"
     logger debug "PID/PPID:  ${$}/${PPID}"
     logger debug '-----------------'
