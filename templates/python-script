@@ -68,7 +68,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180506-142414' #: date of most recent revision
+__revised__ = '20180604-091100' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
@@ -83,7 +83,7 @@ __gnu_version__ = False #: If True print GNU version string (which includes copy
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__ = '2.5.1'  #: version of template file used
+__template_version__ = '2.5.2'  #: version of template file used
 #-- We are not using this variable for now.
 __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
@@ -450,7 +450,7 @@ def RunLogger(debug=False):
     new_logger.debug('Platform:  %s', platform.platform())
     new_logger.debug('Hostname:  %s', platform.node())
     new_logger.debug('Logname:   %s', os.getlogin())
-    new_logger.debug('[res]uid:  %s', os.getresuid())
+    new_logger.debug('[re]uid:  %s/%s', os.getuid(), os.geteuid())
     new_logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
     if options._options is not None:             #: pylint: disable=protected-access
         new_logger.debug('Parsed Options: %s', options._options) #: pylint: disable=protected-access
