@@ -1,0 +1,139 @@
+# =============================================================================
+# Name:       Ansible Role Template
+# Author:     awmyhr
+# Revised:    20180720-114233
+# Created:    2018-07-20
+# =============================================================================
+# -----------------------------------------------------------------------------
+# -- Creates an Ansible Role skeleton, initilizing it as a git-flow repo.
+# -----------------------------------------------------------------------------
+# --
+---
+options:
+  - git
+  - git-flow
+
+.editorconfig:
+  src: misc-editorconfig
+  mode: 644
+  type: static
+
+.gitattributes:
+  src: git-attribute
+  mode: 644
+  type: static
+
+.gitignore:
+  src: git-ignore
+  mode: 644
+  type: static
+
+.projectrc:
+  src: misc-projectrc
+  mode: 644
+  type: template
+
+CHANGELOG.md:
+  src: changelog-project
+  mode: 644
+  type: template
+
+README.md:
+  src: ansible-readme
+  mode: 644
+  type: template
+
+files:
+  mode: 755
+  type: directory
+  contents:
+    .git_keep:
+      mode: 644
+      type: empty
+
+templates:
+  mode: 755
+  type: directory
+  contents:
+    .git_keep:
+      mode: 644
+      type: empty
+
+defaults:
+  mode: 755
+  type: directory
+  contents:
+    main.yml:
+      src: ansible-common
+      mode: 644
+      type: template
+      var_type: 'Defaults'
+      var_subtype: 'main'
+
+handlers:
+  mode: 755
+  type: directory
+  contents:
+    main.yml:
+      src: ansible-common
+      mode: 644
+      type: template
+      var_type: 'Handlers'
+      var_subtype: 'main'
+
+tasks:
+  mode: 755
+  type: directory
+  contents:
+    main.yml:
+      src: ansible-common
+      mode: 644
+      type: template
+      var_type: 'Tasks'
+      var_subtype: 'main'
+
+vars:
+  mode: 755
+  type: directory
+  contents:
+    main.yml:
+      src: ansible-common
+      mode: 644
+      type: template
+      var_type: 'Vars'
+      var_subtype: 'main'
+
+docs:
+  mode: 755
+  type: directory
+  contents:
+    main.rst:
+      src: rest-empty
+      mode: 644
+      type: template
+
+meta:
+  mode: 755
+  type: directory
+  contents:
+    main.yml:
+      src: ansible-meta
+      mode: 644
+      type: template
+      var_type: 'Meta'
+      var_subtype: 'main'
+
+tests:
+  mode: 755
+  type: directory
+  contents:
+    inventory:
+      src: inventory
+      mode: 644
+      type: static
+    test.yml:
+      src: ansible-pb-test
+      mode: 644
+      type: template
+      var_type: 'Tests'
+      var_subtype: 'test'
