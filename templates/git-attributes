@@ -1,0 +1,87 @@
+#==============================================================================
+# gitattributes [https://git-scm.com/docs/gitattributes]
+#------------------------------------------------------------------------------
+# Author:     awmyhr <awmyhr@gmail.com>
+# Revised:    2018-07-20
+# Created:    2016-12-21
+#==============================================================================
+#-- Reference: https://github.com/alexkaratarakis/gitattributes
+#              http://davidlaing.com/2012/09/19/customise-your-gitattributes-to-become-a-git-ninja/
+#------------------------------------------------------------------------------
+#-- Common attributes
+#------------------------------------------------------------------------------
+# Auto-detect text files and perform LF normalization
+* text=auto
+# The above will handle all files NOT found below
+#------------------------------------------------------------------------------
+#-- Documents
+*.doc   diff=astextplain
+*.DOC   diff=astextplain
+*.docx  diff=astextplain
+*.DOCX  diff=astextplain
+*.dot   diff=astextplain
+*.DOT   diff=astextplain
+*.pdf   diff=astextplain
+*.PDF   diff=astextplain
+*.rtf   diff=astextplain
+*.RTF   diff=astextplain
+*.adoc  text
+*.csv   text
+*.md    text
+*.sql   text
+*.tab   text
+*.tsv   text
+*.mustache  text
+*.textile   text
+#------------------------------------------------------------------------------
+#-- Graphics
+*.aif   binary
+*.aifc  binary
+*.aiff  binary
+*.au    binary
+*.bmp   binary
+*.eps   binary
+*.exe   binary
+*.gif   binary
+*.icns  binary
+*.ico   binary
+*.jpeg  binary diff=exif
+*.jpg   binary diff=exif
+*.pck   binary
+*.png   binary
+*.psd   binary
+*.tar   binary
+*.tar.gz binary
+*.tgz   binary
+*.tif   binary
+*.tiff  binary
+*.wav   binary
+*.whl   binary
+*.zip   binary
+# NOTE: SVG treated as an asset (binary) by default. If you want to treat it as
+#       text comment-out the following line and uncomment the line after.
+*.svg   binary
+#*.svg   text
+#------------------------------------------------------------------------------
+#-- Python attributes
+#------------------------------------------------------------------------------
+#-- Source files
+*.pxd   text whitespace=indent,trail,space diff=python
+*.py    text
+*.py3   text
+*.pyw   text
+*.pyx   text
+#------------------------------------------------------------------------------
+#-- Binary files
+*.db    binary
+*.p     binary
+*.pkl   binary
+*.pyc   binary
+*.pyd   binary
+*.pyo   binary
+#------------------------------------------------------------------------------
+#-- Deal with some whitespace
+#------------------------------------------------------------------------------
+* whitespace=!indent,trail,space
+*.[ch] whitespace=indent,trail,space diff=cpp
+*.sh whitespace=indent,trail,space

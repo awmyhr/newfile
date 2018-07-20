@@ -19,7 +19,7 @@ options:
   type: static
 
 .gitattributes:
-  src: git-attribute
+  src: git-attributes
   mode: 644
   type: static
 
@@ -34,7 +34,7 @@ options:
   type: template
 
 CHANGELOG.md:
-  src: changelog-project
+  src: changelog-semantic
   mode: 644
   type: template
 
@@ -67,8 +67,8 @@ defaults:
       src: ansible-common
       mode: 644
       type: template
-      var_type: 'Defaults'
-      var_subtype: 'main'
+      ansible_type: 'Defaults'
+      ansible_subtype: 'main'
 
 handlers:
   mode: 755
@@ -78,8 +78,8 @@ handlers:
       src: ansible-common
       mode: 644
       type: template
-      var_type: 'Handlers'
-      var_subtype: 'main'
+      ansible_type: 'Handlers'
+      ansible_subtype: 'main'
 
 tasks:
   mode: 755
@@ -89,8 +89,8 @@ tasks:
       src: ansible-common
       mode: 644
       type: template
-      var_type: 'Tasks'
-      var_subtype: 'main'
+      ansible_type: 'Tasks'
+      ansible_subtype: 'main'
 
 vars:
   mode: 755
@@ -100,8 +100,8 @@ vars:
       src: ansible-common
       mode: 644
       type: template
-      var_type: 'Vars'
-      var_subtype: 'main'
+      ansible_type: 'Vars'
+      ansible_subtype: 'main'
 
 docs:
   mode: 755
@@ -120,8 +120,8 @@ meta:
       src: ansible-meta
       mode: 644
       type: template
-      var_type: 'Meta'
-      var_subtype: 'main'
+      ansible_type: 'Meta'
+      ansible_subtype: 'main'
 
 tests:
   mode: 755
@@ -135,5 +135,5 @@ tests:
       src: ansible-pb-test
       mode: 644
       type: template
-      var_type: 'Tests'
-      var_subtype: 'test'
+      ansible_type: 'Tests'
+      ansible_subtype: 'test'
