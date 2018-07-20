@@ -1,3 +1,137 @@
-* whitespace=!indent,trail,space
-*.[ch] whitespace=indent,trail,space diff=cpp
-*.sh whitespace=indent,trail,space
+#==============================================================================
+# gitattributes [https://git-scm.com/docs/gitattributes]
+#------------------------------------------------------------------------------
+# Author:     awmyhr <awmyhr@gmail.com>
+# Revised:    2018-07-20
+# Created:    2016-12-21
+#==============================================================================
+#-- Reference: https://github.com/alexkaratarakis/gitattributes
+#              http://davidlaing.com/2012/09/19/customise-your-gitattributes-to-become-a-git-ninja/
+#------------------------------------------------------------------------------
+#-- Common attributes
+#------------------------------------------------------------------------------
+# Auto-detect text files and perform LF normalization
+* text=auto
+# The above will handle all files NOT found below
+#------------------------------------------------------------------------------
+#-- Documents
+*.doc   diff=astextplain
+*.DOC   diff=astextplain
+*.docx  diff=astextplain
+*.DOCX  diff=astextplain
+*.dot   diff=astextplain
+*.DOT   diff=astextplain
+*.pdf   diff=astextplain
+*.PDF   diff=astextplain
+*.rtf   diff=astextplain
+*.RTF   diff=astextplain
+*.adoc  text
+*.csv   text
+*.sql   text
+*.tab   text
+*.tsv   text
+*.mustache  text
+*.textile   text
+#------------------------------------------------------------------------------
+#-- Graphics
+*.aif   binary
+*.aifc  binary
+*.aiff  binary
+*.au    binary
+*.bmp   binary
+*.eps   binary
+*.exe   binary
+*.gif   binary
+*.icns  binary
+*.ico   binary
+*.jpeg  binary diff=exif
+*.jpg   binary diff=exif
+*.pck   binary
+*.png   binary
+*.psd   binary
+*.tar   binary
+*.tar.gz binary
+*.tgz   binary
+*.tif   binary
+*.tiff  binary
+*.wav   binary
+*.whl   binary
+*.zip   binary
+# NOTE: SVG treated as an asset (binary) by default. If you want to treat it as
+#       text comment-out the following line and uncomment the line after.
+*.svg   binary
+#*.svg   text
+#------------------------------------------------------------------------------
+#-- Python attributes
+#------------------------------------------------------------------------------
+#-- Source files
+*.pxd   text eol=lf diff=python
+*.py    text eol=lf diff=python
+*.py3   text eol=lf diff=python
+*.pyw   text eol=lf diff=python
+*.pyx   text eol=lf diff=python
+#------------------------------------------------------------------------------
+#-- Binary files
+*.db    binary
+*.p     binary
+*.pkl   binary
+*.pyc   binary
+*.pyd   binary
+*.pyo   binary
+#------------------------------------------------------------------------------
+#-- Perl attributes
+#------------------------------------------------------------------------------
+#-- Source files
+*.perl  text eol=lf diff=perl
+*.pl    text eol=lf diff=perl
+*.pm    text eol=lf diff=perl
+#------------------------------------------------------------------------------
+#-- shell attributes
+#------------------------------------------------------------------------------
+#-- Source files
+*.bash  text eol=lf
+*.csh   text eol=lf
+*.ksh   text eol=lf
+*.sh    text eol=lf
+*.zsh   text eol=lf
+#------------------------------------------------------------------------------
+#-- Text files
+*.adoc  text eol=lf
+*.md    text eol=lf
+*.rst   text eol=lf
+*.conf  text eol=lf
+*.json  text eol=lf
+*.txt   text eol=lf
+*.xml   text eol=lf
+*.yml   text eol=lf
+#------------------------------------------------------------------------------
+#-- Misc files
+#------------------------------------------------------------------------------
+#-- Text files
+*.c     text eol=lf diff=cpp
+*.cpp   text eol=lf diff=cpp
+*.erl   text eol=lf
+*.hrl   text eol=lf
+*.yrl   text eol=lf
+*.func  text eol=lf
+*.h     text eol=lf diff=cpp
+*.html  text eol=lf diff=html
+*.inc   text eol=lf
+*.java  text eol=lf diff=java
+*.js    text eol=lf
+*.mk    text eol=lf
+*.nc    text eol=lf
+*.php   text eol=lf diff=php
+*.xml   text eol=lf
+*.yang  text eol=lf
+Makefile*   text eol=lf
+.classpath  text eol=lf
+.project    text eol=lf
+#------------------------------------------------------------------------------
+#-- Ignore when exporting
+#------------------------------------------------------------------------------
+.editorconfig   export-ignore
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.gitmodules     export-ignore
+.projectrc      export-ignore
