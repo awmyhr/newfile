@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ^^-- use utf-8 strings by default
 #-- NOTE: Tabs and spaces do NOT mix!! '-tt' will flag violations as an error.{#
-# pylint: disable=line-too-long,invalid-name
+# pylint: disable=line-too-long
 #-- line-too-long is inevitable with the Jinga2 strings #}
 #===============================================================================
 """{#
@@ -59,7 +59,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180406-165817' #: date of most recent revision
+__revised__ = '20180722-140309' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = """{{ script_description|default("TODO: CHANGEME", true) }}
@@ -227,7 +227,7 @@ def set_value(file, key, value):
 
 
 #==============================================================================
-def CLILogger(opts):
+def CLILogger(opts): #: pylint: disable=invalid-name
     """ Set up the Logger """
     if 'logger' in globals():
         logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
@@ -323,7 +323,7 @@ def which(program):
 
 
 #==============================================================================
-class CLIOptions(object):
+class CLIOptions(object): #: pylint: disable=invalid-name
     """ Parse the options and put them into an object """
 
     _options = None
@@ -414,7 +414,7 @@ def main():
     logger.error('error message')
     logger.critical('critical message')
 
-    print options._options
+    print(options._options)
     # print(timestamp())
     # print('FILE')
     # tempfile = get_temp()
