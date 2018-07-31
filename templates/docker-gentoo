@@ -1,11 +1,16 @@
-# From template version: 1.0.0 (2018-07-12)
-# Author:    {{ full_name|default("TODO: CHANGEME", true) }}
-# Created:   {{ date|default("TODO: CHANGEME", true) }}
-# Project:   {{ project_name|default("TODO: CHANGEME", true) }}
-# Copyright: {{ software_copyright|default("TODO: CHANGEME", true) }}
-# License:   {{ software_license|default("TODO: CHANGEME", true) }}
+#==============================================================================
+#-- From template version: 1.1.0 (2018-07-31)
+#==============================================================================
 FROM gentoo/stage3-amd64:latest
-
+ARG PROJECT='{{ project_name|default("TODO: CHANGEME", true) }}'
+ARG AUTHOR='{{ full_name|default("TODO: CHANGEME", true) }}'
+ARG VERSION='{{ version|default('TODO: CHANGEME', true) }}'
+ARG REVISED='{[ date|default('TODO: CHANGEME', true) ]}'
+ARG CREATED='{{ date|default("TODO: CHANGEME", true) }}'
+ARG COPYRIGHT='{{ software_copyright|default("TODO: CHANGEME", true) }}'
+ARG LICENSE='{{ software_license|default("TODO: CHANGEME", true) }}'
+#------------------------------------------------------------------------------
+#--
 ENV container=docker \
     PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -15,14 +20,16 @@ ENV container=docker \
 
 CMD ["/bin/bash"]
 
-LABEL org.label-schema.name="{{ project_name|default('TODO: CHANGEME', true) }}" \
+#------------------------------------------------------------------------------
+LABEL org.label-schema.name="${PROJECT}" \
       org.label-schema.vendor="{{ contact_name|default('TODO: CHANGEME', true) }} <{{ contact_email|default('TODO: CHANGEME', true) }}" \
-      org.label-schema.version="{{ version|default('TODO: CHANGEME', true) }}" \
-      org.label-schema.release="{{ date|default('TODO: CHANGEME', true) }}" \
+      org.label-schema.version="${VERSION}" \
+      org.label-schema.release="${REVISED}" \
       org.label-schema.url="{{ project_home|default('TODO: CHANGEME', true) }}" \
       org.label-schema.vcs-type="git" \
       org.label-schema.vcs-url="{{ project_home|default('TODO: CHANGEME', true) }}" \
       org.label-schema.summary="{{ script_synopsis|default('TODO: CHANGEME <100 char', true) }}" \
       org.label-schema.description="{{ script_description|default('TODO: CHANGEME <300 char', true) }}" \
       org.label-schema.schema-version='1.0.0-rc.1'
+#------------------------------------------------------------------------------
 
