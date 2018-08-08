@@ -1,12 +1,12 @@
 #==============================================================================
-#-- From template version: 1.2.0 (2018-08-02)
+#-- From template version: 1.2.1 (2018-08-08)
 #==============================================================================
 FROM fedora:latest
 #------------------------------------------------------------------------------
 ENV PROJECT='{{ project_name|default("TODO: CHANGEME", true) }}' \
     AUTHOR='{{ full_name|default("TODO: CHANGEME", true) }}' \
     VERSION='{{ version|default('TODO: CHANGEME', true) }}' \
-    REVISED='{[ date|default('TODO: CHANGEME', true) ]}' \
+    REVISED='{{ date|default('TODO: CHANGEME', true) }}' \
     CREATED='{{ date|default("TODO: CHANGEME", true) }}' \
     COPYRIGHT='{{ software_copyright|default("TODO: CHANGEME", true) }}' \
     LICENSE='{{ software_license|default("TODO: CHANGEME", true) }}' \
