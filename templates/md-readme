@@ -20,7 +20,7 @@
 ```
 ```
 
-## Maintaniers
+## Maintainers
 
 - {{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>
 
