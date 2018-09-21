@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180921-152425' #: date of most recent revision
+__revised__='20180921-153642' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -52,7 +52,7 @@ __gnu_version__='False'  #: If True print GNU version string (which includes cop
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.5.0'  #: version of template file used
+__template_version__='2.6.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -81,6 +81,12 @@ cf_cyan=${cf_cyan:=''}     ; cf_green=${cf_green:=''}
 c_bold=${c_bold:=''}       ; c_reset=${c_reset:=''}
 c_undr=${c_undr:=''}       ; c_hide=${c_hide:=''}
 c_blik=${c_blik:=''}       ; c_revr=${c_revr:=''}
+#------------------------------------------------------------------------------
+#-- Set some default settings
+#-- NOTE: If you don't want to handle these error conditions yourself,
+#         then uncomment these.
+# set -o errexit  # Exit if any statement returns non-true value
+# set -o nounset  # Exit if attempt to use an uninitialised variable
 #==============================================================================
 _usage() {
     #:"""
@@ -96,7 +102,7 @@ _usage() {
     printf 'Usage: %s [options]\n\n' "${__basename__}"
     printf '%s\n\n' "${__synopsis__}"
     printf 'Options:\n'
-    _usage_options '  %s     %s\n'
+    usage_options '  %s     %s\n'
     printf '\n%s\n\n' "${__description__}"
     printf 'Created: %s  Contact: %s\n' "${__created__}" "${__contact__}"
     printf 'Revised: %s  Version: %s\n' "${__revised__}" "${__version__}"
@@ -104,27 +110,6 @@ _usage() {
     printf '%s, part of %s. Project home: %s\n' "${__cononical_name__}" \
                                                 "${__project_name__}" \
                                                 "${__project_home__}"
-
-    return
-}
-
-#==============================================================================
-_usage_options() {
-    #:"""
-    #: .. function:: _usage_options()
-    #:
-    #: Lists options usign format passed to it.
-    #:
-    #: :param str option_strfmt: The format to use.
-    #:"""
-    #-- TODO: UPDATE option list.
-    __usage_option_strfmt="${1}"
-    #-- We are using a variable to format data in printf
-    # shellcheck disable=2059
-    printf "${__usage_option_strfmt}" '--help, -h' 'Dislay this help'
-    #-- We are using a variable to format data in printf
-    # shellcheck disable=2059
-    printf "${__usage_option_strfmt}" '--version ' 'Display version'
 
     return
 }
@@ -155,7 +140,7 @@ _usage_rest() {
     printf '%s\n\n' "${__description__}"
     printf 'Options\n'
     printf '%s\n\n' '-------'
-    _usage_options '.. option:: %s\n\n    %s\n\n'
+    usage_options '.. option:: %s\n\n    %s\n\n'
     printf 'Author\n'
     printf '%s\n\n' '------'
     printf '%s\n\n' "${__author__}"
@@ -455,7 +440,6 @@ init() {
     #:
     #: Check for requirements, other set-up stuff
     #:"""
-    #-- TODO: 'Initilize', check for requirements, etc...
     #--------------------------------------------------------------------------
     #-- Check if effectively root
     #--------------------------------------------------------------------------
@@ -469,6 +453,27 @@ init() {
       exit_error 78 'This script is not container safe.'
     fi
     #--------------------------------------------------------------------------
+    return
+}
+
+#==============================================================================
+usage_options() {
+    #:"""
+    #: .. function:: usage_options()
+    #:
+    #: Lists options usign format passed to it.
+    #:
+    #: :param str option_strfmt: The format to use.
+    #:"""
+    #-- TODO: UPDATE option list.
+    __usage_option_strfmt="${1}"
+    #-- We are using a variable to format data in printf
+    # shellcheck disable=2059
+    printf "${__usage_option_strfmt}" '--help, -h' 'Dislay this help'
+    #-- We are using a variable to format data in printf
+    # shellcheck disable=2059
+    printf "${__usage_option_strfmt}" '--version ' 'Display version'
+
     return
 }
 
@@ -495,10 +500,6 @@ else
     __script_debug__='false'
 fi
 
-#-- Some default settings
-set -o errexit  # Exit if any statement returns non-true value
-set -o nounset  # Exit if attempt to use an uninitialised variable
-
 #:"""
 #: .. note::
 #:     Setting traps seprately for 2 reasons:
@@ -517,7 +518,7 @@ trap '_exit_trap ${LINENO} HUP'  HUP
 #   NOTE: this is not optimal, but is an attempt to keep things POSIX
 #         compliant. If you are expecting arguments instead of params,
 #         be sure to assign them... somehow...
-#   Be sure to update _usage_options as well
+#   Be sure to update usage_options() as well
 # {% raw %}
 # [ "${#}" -gt 0 ] && while :; do
 while [ "${#}" -gt 0 ]; do  # {% endraw %}
