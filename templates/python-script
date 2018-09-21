@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ^^-- use utf-8 strings by default
 #-- NOTE: Tabs and spaces do NOT mix!! '-tt' will flag violations as an error.{#
-# pylint: disable=line-too-long,invalid-name
+# pylint: disable=line-too-long
 #-- line-too-long is inevitable with the Jinga2 strings #}
 #===============================================================================
 '''{#
@@ -68,7 +68,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20180604-091100' #: date of most recent revision
+__revised__ = '20180722-140309' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
