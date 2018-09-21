@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180921-150327' #: date of most recent revision
+__revised__='20180921-152425' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -52,14 +52,13 @@ __gnu_version__='False'  #: If True print GNU version string (which includes cop
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.4.1'  #: version of template file used
+__template_version__='2.5.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
 __basename__="${0}"  #: name script run as
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
-__logger_file_set__='false' #: If a file setup for logger
 __default_dsf__=${DEFAULT_TIMESTAMP:="+%Y%m%d-%H%M%S"} #: Default format for 'date' command
 __logger_dsf__=${LOGGER_DSF:="+%Y%m%d-%H%M%S"}         #: Debug logging output format for 'date' command
 __backup_dsf__=${BACKUP_DSF:="+%Y%m%d-%H%M%S"}         #: Backup file format for 'date' command
@@ -470,36 +469,30 @@ init() {
       exit_error 78 'This script is not container safe.'
     fi
     #--------------------------------------------------------------------------
-    #-- Create log file if needed AND we didn't do it in --debug check
-    #--------------------------------------------------------------------------
-    if [ "${__logger_file__}" != "nil" ] && [ "${__logger_file_set__}" != "true" ]; then
-        if [ -f "${__logger_file__}" ] ; then
-            mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
-        fi
-        exec 3<> "${__logger_file__}" || exit 1
-        __logger_file_set__='true'
-    fi
-    #--------------------------------------------------------------------------
     return
 }
 
 #==============================================================================
+#-- Set up log file
+if [ "${__logger_file__}" != "nil" ]; then
+    if [ -f "${__logger_file__}" ] ; then
+        mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
+    fi
+    exec 3<> "${__logger_file__}" || exit 1
+    __logger_file_set__='true'
+else
+    exec 3>&1 || exit 1
+    __logger_file_set__='false'
+fi
 #-- Check for debug flag & process
 if [ "${*#*--debug}" != "${*}" ]; then
-    if [ "${__logger_file__}" != "nil" ]; then
-        if [ -f "${__logger_file__}" ] ; then
-            mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
-        fi
-        exec 3<> "${__logger_file__}" || exit 1
-        __logger_file_set__='true'
-    fi
     __script_debug__='true'
     __logger_lvl__=10
     _debug_info "$@"
     #-- Only do full shell trace if external DEBUG var set to full
     [ "${DEBUG}" = 'full' ] && set -o xtrace
 else
-    __script_debug__=false
+    __script_debug__='false'
 fi
 
 #-- Some default settings
@@ -524,6 +517,7 @@ trap '_exit_trap ${LINENO} HUP'  HUP
 #   NOTE: this is not optimal, but is an attempt to keep things POSIX
 #         compliant. If you are expecting arguments instead of params,
 #         be sure to assign them... somehow...
+#   Be sure to update _usage_options as well
 # {% raw %}
 # [ "${#}" -gt 0 ] && while :; do
 while [ "${#}" -gt 0 ]; do  # {% endraw %}
