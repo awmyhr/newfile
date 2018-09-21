@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20180505-154445' #: date of most recent revision
+__revised__='20180921-122325' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -45,7 +45,7 @@ __gnu_version__='False'  #: If True print GNU version string (which includes cop
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.3.1'  #: version of template file used
+__template_version__='2.4.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -54,6 +54,7 @@ __basename__="${0}"  #: name script run as
 #-- Flags
 __logger_file_set__='false' #: If a file setup for logger
 __require_root__='false'    #: Does script require root
+__container_safe__='false'  #: Are we safe to run inside a Docker container?
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
 __default_dsf__=${DEFAULT_TIMESTAMP:="+%Y%m%d-%H%M%S"} #: Default format for 'date' command
@@ -433,8 +434,8 @@ identify_platform() {
     if [ -f '/sys/devices/virtual/dmi/id/sys_vendor' ] ; then
         __identify_platform_sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor)"
         case "${__identify_platform_sys_vendor}" in
-            'Microsoft Corporation') printf 'az' ;;
-            'VMware, Inc.')          printf 'vm' ;;
+            'Microsoft Corporation') printf 'azure' ;;
+            'VMware, Inc.')          printf 'vmware' ;;
             'innotek GmbH')          printf 'vbox' ;;
             *)                       printf 'hw' ;;
         esac
@@ -458,6 +459,12 @@ init() {
     #--------------------------------------------------------------------------
     if [ "${__require_root__}" = "true" ] && [ "$(id -u)" -ne 0 ] ; then
       exit_error 77 'Must be run as root.'
+    fi
+    #--------------------------------------------------------------------------
+    #-- Check if running inside Docker container
+    #--------------------------------------------------------------------------
+    if [ "${__container_safe__}" = "false" ] && grep -q '/docker' /proc/self/cgroup ; then
+      exit_error 78 'This script is not container safe.'
     fi
     #--------------------------------------------------------------------------
     #-- Create log file if needed AND we didn't do it in --debug check
