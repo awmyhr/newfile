@@ -3,7 +3,7 @@
 # INI formated, requires your editor has a plug-in
 #------------------------------------------------------------------------------
 # Author:     awmyhr <awmyhr@gmail.com>
-# Revised:    2018-07-20
+# Revised:    20180921-122237
 # Created:    2017-03-23
 #==============================================================================
 #-- General settings
@@ -23,6 +23,11 @@ trim_trailing_whitespace = true
 [*.md]
 insert_final_newline = false
 trim_trailing_whitespace = false
+
+#------------------------------------------------------------------------------
+#-- ReStructuredText files
+[*.rst]
+indent_size = 3
 
 #------------------------------------------------------------------------------
 #-- YAML files
