@@ -1,0 +1,17 @@
+# =============================================================================
+# Type:       Persistent Volume Claim
+# Author:     awmyhr <awmyhr@gmail.com>
+# Revised:    2018-08-23
+# Created:    2018-08-23
+# =============================================================================
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ pvc_name|default("claim", true) }}-pvc01
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ pvc_size|default("1Gi", true) }}

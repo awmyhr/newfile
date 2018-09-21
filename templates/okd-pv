@@ -1,0 +1,20 @@
+# =============================================================================
+# Type:       Persistent (nfs) Volume
+# Author:     awmyhr <awmyhr@gmail.com>
+# Revised:    2018-08-23
+# Created:    2018-08-23
+# =============================================================================
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ pv_name|default("volume", true) }}-pv01
+spec:
+  capacity:
+    storage: {{ pvc_size|default("5Gi", true) }}
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: {{ nfs_path|default("TODO: CHANGEME", true) }}
+    server: {{ nfs_server|default("TODO: CHANGEME", true) }}
+  persistentVolumeReclaimPolicy: Recycle

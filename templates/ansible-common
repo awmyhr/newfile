@@ -1,0 +1,9 @@
+# =============================================================================
+# Management: Ansible
+# Role:       {{ script_name|default("TODO: CHANGEME", true) }}
+# Type:       {{ ansible_type|default('TODO: CHANGEME', true) }} ({{ ansible_subtype|default('TODO: CHANGEME', true) }})
+# Author:     {{ full_name|default('TODO: CHANGEME', true) }} <{{ email|default('TODO: CHANGEME', true) }}>
+# Revised:    {{ date|default("TODO: CHANGEME", true) }}
+# Created:    {{ date|default("TODO: CHANGEME", true) }}
+# =============================================================================
+---
