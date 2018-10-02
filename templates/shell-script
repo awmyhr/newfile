@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20181001-120713' #: date of most recent revision
+__revised__='20181002-125542' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -37,22 +37,22 @@ __description__="
 "
 #------------------------------------------------------------------------------
 #-- TODO: If you want to hard-set some variables, do it here. For example:
-# LOGGER_FILE="/root/var/log/{{ script_name|default("script_logger", true) }}.$(date +%Y%m%d-%H%M%S).log"
+# LOGGER_FILE="${HOME}/var/log/{{ script_name|default("script_logger", true) }}.$(date +%Y%m%d-%H%M%S).log"
 #------------------------------------------------------------------------------
 #-- Flags
 __require_root__='false'    #: Does script require root
 __container_safe__='false'  #: Are we safe to run inside a Docker container?
+__gnu_version__='false'     #: If true print GNU version string (which includes copyright/license)
 #==============================================================================
 #-- The following few variables should be relatively static over life of script
 __author__='{{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default("TODO: CHANGEME", true) }}>' #: coder(s) of script
 __created__='{{ date|default("TODO: CHANGEME", true) }}'               #: date script originlly created
 __copyright__='{{ software_copyright|default("TODO: CHANGEME", true) }}' #: Copyright short name
 __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
-__gnu_version__='False'  #: If True print GNU version string (which includes copyright/license)
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.7.0'  #: version of template file used
+__template_version__='2.8.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -162,7 +162,7 @@ _version() {
     #:     GNU guidelines dictate adding copyright and license info
     #:"""
     printf '%s (%s) %s\n' "${__cononical_name__}" "${__project_name__}" "${__version__}"
-    if [ "${__gnu_version__}" = 'True' ]; then
+    if [ "${__gnu_version__}" = 'true' ]; then
         printf 'Copyright %s\n' "${__copyright__}"
         printf 'License %s\n' "${__license__}"
     fi
@@ -494,12 +494,12 @@ fi
 if [ "${*#*--debug}" != "${*}" ]; then
     __script_debug__='true'
     __logger_lvl__=10
-    _debug_info "$@"
     #-- Only do full shell trace if external DEBUG var set to full
     [ "${DEBUG}" = 'full' ] && set -o xtrace
 else
     __script_debug__='false'
 fi
+_debug_info "$@"
 
 #:"""
 #: .. note::
@@ -528,9 +528,9 @@ while [ "${#}" -gt 0 ]; do  # {% endraw %}
         -h|--help)   _usage   && exit 0 ;;
         --help-rest) _usage_rest   && exit 0 ;;
         --version)   _version && exit 0 ;;
-        --)          shift && break ;;
-        -?*)         exit_error 64 "invalid option: ${1}" ;;
-        *)           ;;
+        # --)          shift && break ;;
+        # -?*)         exit_error 64 "Invalid option: ${1}" ;;
+        *)           exit_error 64 "Invalid option: ${1}" ;;
     esac
 
     shift
