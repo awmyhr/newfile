@@ -1,0 +1,14 @@
+:info: git repo {{ project_home|default("TODO: CHANGEME", true) }}
+:author: {{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default("TODO: CHANGEME", true) }}>
+:date: {{ date|default("TODO: CHANGEME", true) }}
+:revision: 20181002-153743
+:description:
+    {{ script_synopsis|default("TODO: Single-line summary", true) }}
+
+.. index::
+.. highlight:: bash
+
+*************************************************
+{{ script_name|default("TODO: CHANGEME", true) }}
+*************************************************
+
