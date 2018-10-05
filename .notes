@@ -1,0 +1,24 @@
+#----------------------------------------------------------------------
+#-- Create a new document (newdoc)
+#----------------------------------------------------------------------
+#-- aka: Project Replace sphinx-quickstart
+mkdir "${DOC}"
+cd "${DOC}" || exit
+newfile -l sphinx -t confpy   conf.py
+newfile -l sphinx -t makefile Makefile
+newfile -l rest   -t index    index.rst
+mkdir _build _static _templates
+grep TODO [conf.py|Makefile|index.rst]
+#----------------------------------------------------------------------
+#-- Create a new project (newproj)
+#----------------------------------------------------------------------
+#--
+git flow init -d "${PROJ}"
+cd "${PROJ}" || exit
+# [copy/create] .editorconfig .gitattributes .gitignore .projectrc
+# Need to make sure .projectrc is configured before continuing
+newfile -l md -t readme README.md
+newfile -l md -t changelog CHANGELOG.md
+git add .editorconfig .gitattributes .gitignore .projectrc README.md CHANGELOG.md
+git commit -m "Initial commit of common files"
+
