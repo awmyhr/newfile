@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20181002-151113' #: date of most recent revision
+__revised__='20181015-152700' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -43,6 +43,7 @@ __description__="
 __require_root__='false'    #: Does script require root
 __container_safe__='false'  #: Are we safe to run inside a Docker container?
 __gnu_version__='false'     #: If true print GNU version string (which includes copyright/license)
+__script_debug__='false'    #: This can be set to 'true' via --debug paramater
 #==============================================================================
 #-- The following few variables should be relatively static over life of script
 __author__='{{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default("TODO: CHANGEME", true) }}>' #: coder(s) of script
@@ -52,7 +53,7 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.8.1'  #: version of template file used
+__template_version__='2.9.0'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -87,6 +88,12 @@ c_blik=${c_blik:=''}       ; c_revr=${c_revr:=''}
 #         then uncomment these.
 # set -o errexit  # Exit if any statement returns non-true value
 # set -o nounset  # Exit if attempt to use an uninitialised variable
+#==============================================================================
+#-- Check for debug & full debug flags
+if [ "${*#*--debug}" != "${*}" ]; then
+    #-- Only do full shell trace if external DEBUG var set to full
+    [ "${DEBUG}" = 'full' ] && set -o xtrace
+fi
 #==============================================================================
 _usage() {
     #:"""
@@ -453,6 +460,19 @@ init() {
       exit_error 78 'This script is not container safe.'
     fi
     #--------------------------------------------------------------------------
+    #-- Set up log file
+    if [ "${__logger_file__}" != "nil" ]; then
+        mkdir -p "$(dirname "${__logger_file__}")"
+        if [ -f "${__logger_file__}" ] ; then
+            mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
+        fi
+        exec 3<> "${__logger_file__}" || exit 1
+        __logger_file_set__='true'
+    else
+        exec 3>&1 || exit 1
+        __logger_file_set__='false'
+    fi
+    #--------------------------------------------------------------------------
     return
 }
 
@@ -478,29 +498,6 @@ usage_options() {
 }
 
 #==============================================================================
-#-- Set up log file
-if [ "${__logger_file__}" != "nil" ]; then
-    mkdir -p "$(dirname "${__logger_file__}")"
-    if [ -f "${__logger_file__}" ] ; then
-        mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
-    fi
-    exec 3<> "${__logger_file__}" || exit 1
-    __logger_file_set__='true'
-else
-    exec 3>&1 || exit 1
-    __logger_file_set__='false'
-fi
-#-- Check for debug flag & process
-if [ "${*#*--debug}" != "${*}" ]; then
-    __script_debug__='true'
-    __logger_lvl__=10
-    #-- Only do full shell trace if external DEBUG var set to full
-    [ "${DEBUG}" = 'full' ] && set -o xtrace
-else
-    __script_debug__='false'
-fi
-_debug_info "$@"
-
 #:"""
 #: .. note::
 #:     Setting traps seprately for 2 reasons:
@@ -524,7 +521,8 @@ trap '_exit_trap ${LINENO} HUP'  HUP
 # [ "${#}" -gt 0 ] && while :; do
 while [ "${#}" -gt 0 ]; do  # {% endraw %}
     case "${1}" in
-        --debug)     ;;
+        --debug)     __script_debug__='true'
+                     __logger_lvl__=10 ;;
         -h|--help)   _usage   && exit 0 ;;
         --help-rest) _usage_rest   && exit 0 ;;
         --version)   _version && exit 0 ;;
@@ -537,6 +535,7 @@ while [ "${#}" -gt 0 ]; do  # {% endraw %}
 done
 
 init
+_debug_info "$@"
 
 #==============================================================================
 #-- TODO: Do something more interesting here...{#
