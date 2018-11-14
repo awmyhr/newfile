@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20181114-154739' #: date of most recent revision
+__revised__='20181114-161956' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -53,7 +53,7 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.10.1'  #: version of template file used
+__template_version__='2.10.3'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -208,8 +208,12 @@ _debug_info() {
     logger debug "Logname:   ${USERNAME:=$(logname 2>&1)}"
     logger debug "[re]uid:   $(id -ur 2>&1)/$(id -u 2>&1)"
     logger debug "PID/PPID:  ${$}/${PPID}"
-    if [ -x /bin/pstree ] ; then
-        logger debug "$(/bin/pstree -psu ${$})"
+    if [ -x /bin/pstree ] || [ -x /usr/bin/pstree ] ; then
+        if pstree -psu ${$} 1>/dev/null 2>&1 ; then
+            logger debug "pstree psu: $(pstree -psu ${$})"
+        else
+            logger debug "pstree pu: $(pstree -pu ${$})"
+        fi
     fi
     logger debug '-----------------'
     logger debug '----- start -----'
@@ -408,15 +412,22 @@ set_value() {
     #: :param str file:   File to create/modify
     #: :param str key:    Key to create/modify
     #: :param str value:  Value to set key to
+    #: :param str quote:  set to 'noquote' if value is to be unquoted
     #:"""
     __set_value_file="${1}"
     __set_value_key="${2}"
     __set_value_value="${3}"
+    __set_value_quote="${4:="quote"}"
     if [ ! -e "${__set_value_file}" ]; then touch "${__set_value_file}" || return "${?}"; fi
-    if grep -q "^${__set_value_key}=" "${__set_value_file}"; then
-        sed -i "s/^${__set_value_key}=.*/${__set_value_key}='${__set_value_value}'/" "${__set_value_file}" || return "${?}"
+    if [ "${__set_value_quote}" = 'noquote' ] ; then
+        :
     else
-        printf '%s=%s\n' "${__set_value_key}" "'${__set_value_value}'" >> "${__set_value_file}" || return "${?}"
+        __set_value_value="'${__set_value_value}'"
+    fi
+    if grep -q "^${__set_value_key} *=" "${__set_value_file}"; then
+        sed -i -E "s/^${__set_value_key} *=.*/${__set_value_key}=${__set_value_value}/" "${__set_value_file}" || return "${?}"
+    else
+        printf '%s=%s\n' "${__set_value_key}" "${__set_value_value}" >> "${__set_value_file}" || return "${?}"
     fi
 
     return
