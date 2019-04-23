@@ -29,7 +29,7 @@
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20190423-124430' #: date of most recent revision
+__revised__='20190423-130845' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -53,7 +53,7 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.12.0'  #: version of template file used
+__template_version__='2.12.1'  #: version of template file used
 #-- We are not using this variable for now.
 # shellcheck disable=2034
 __docformat__='reStructuredText en'  #: attempted style for documentation
@@ -186,6 +186,7 @@ _usage_ec() {
     #: Print reStructuredText-compatible table of exit conditions
     #:
     #:"""
+    # TODO: This is not yet POSIX-safe
     __usage_ec_lst=$(grep exit_error "${__basename__}" \
                     | sed 's/.*exit_error //g' \
                     | grep '^[0-9]' \
@@ -196,7 +197,7 @@ _usage_ec() {
         #| awk '{printf "| " $1 " | "; for (i=2; i<NF; i++) printf $i " "; print $NF " |"}'
     while read -r __usage_ec_line ; do
         __usage_ec_num="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f1)"
-        __usage_ec_des="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f2-)"
+        __usage_ec_des="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f2- | cut -c -67)"
         printf '| %3d | %-67s |\n' "${__usage_ec_num}" "${__usage_ec_des}"
     done <<< "${__usage_ec_lst}"
 
