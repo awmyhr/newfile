@@ -12,7 +12,7 @@
     ============================================================
 
     In addition to the options listed in help output, :program:`{{ script_name|default("TODO: CHANGEME", true) }}` includes
-    the following 'hidden' optoins:
+    the following 'hidden' options:
 
     .. option:: --help-rest
 
@@ -69,7 +69,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20190329-131049' #: date of most recent revision
+__revised__ = '20190626-122041' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
