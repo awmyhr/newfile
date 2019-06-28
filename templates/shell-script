@@ -26,10 +26,13 @@
 #: {{ script_description|default("TODO: CHANGEME- description for documentation", true) }}
 #:"""
 #==============================================================================
+#: .. section:: Preamble (script-specific vars -- override this)
+#: .. revision:: 2019-06-28
+#------------------------------------------------------------------------------
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20190423-130845' #: date of most recent revision
+__revised__='20190628-173643' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -37,7 +40,11 @@ __description__="
 "
 #------------------------------------------------------------------------------
 #-- TODO: If you want to hard-set some variables, do it here. For example:
+# BACKUP_DSF:="+%Y%m%d-%H%M%S"
+# DEFAULT_TIMESTAMP="+%Y%m%d-%H%M%S"
+# LOGGER_DSF="+%Y%m%d-%H%M%S"
 # LOGGER_FILE="${HOME}/var/log/{{ script_name|default("script_logger", true) }}.$(date +%Y%m%d-%H%M%S).log"
+# LOGGER_LVL:="info"
 #------------------------------------------------------------------------------
 #-- Flags
 __require_root__='false'    #: Does script require root
@@ -53,11 +60,15 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.12.1'  #: version of template file used
+__template_version__='2.13.0'  #: version of template file used
+#==============================================================================
+#: .. section:: General variables & settings
+#: .. revision:: 2019-06-28
+#------------------------------------------------------------------------------
+__basename__="${0}"                                    #: name script run as
 #-- We are not using this variable for now.
 # shellcheck disable=2034
-__docformat__='reStructuredText en'  #: attempted style for documentation
-__basename__="${0}"         #: name script run as
+__docformat__='reStructuredText en'                    #: attempted style for documentation
 __original_args__="${*}"    #: capture original arg list before messing with it
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
@@ -89,7 +100,14 @@ c_blik=${c_blik:=''}       ; c_revr=${c_revr:=''}
 #         then uncomment these.
 # set -o errexit  # Exit if any statement returns non-true value
 # set -o nounset  # Exit if attempt to use an uninitialised variable
-#==============================================================================
+#------------------------------------------------------------------------------
+#-- Check for debug & full debug flags
+#   NOTE: this is not POSIX
+if [ "${*#*--debug}" != "${*}" ]; then
+    #-- Only do full shell trace if external DEBUG var set to full
+    [ "${DEBUG}" = 'full' ] && set -o xtrace
+fi
+#------------------------------------------------------------------------------
 #-- Basic environment setup
 #   Ref: https://github.com/fedora-sysv/initscripts)
 #------------------------------------------------------------------------------
@@ -97,11 +115,10 @@ c_blik=${c_blik:=''}       ; c_revr=${c_revr:=''}
 umask 022
 #-- Sane command search path
 PATH="/sbin:/usr/sbin:/bin:/usr/bin"
-export PATH
 #-- Sane screen width
 [ -z "${COLUMNS:-}" ] && COLUMNS=80
 if [ -z "${CONSOLETYPE:-}" ]; then
-    if [ -c "/dev/stderr" -a -r "/dev/stderr" ]; then
+    if [ -c "/dev/stderr" ] && [ -r "/dev/stderr" ]; then
         if [ -x "$(command -v consoletype)" ] ; then
             CONSOLETYPE="$(consoletype < /dev/stderr 2>/dev/null)"
         elif [ -x "$(command -v tty)" ] ; then
@@ -114,156 +131,13 @@ if [ -z "${CONSOLETYPE:-}" ]; then
     fi
 fi
 #==============================================================================
-#-- Check for debug & full debug flags
-if [ "${*#*--debug}" != "${*}" ]; then
-    #-- Only do full shell trace if external DEBUG var set to full
-    [ "${DEBUG}" = 'full' ] && set -o xtrace
-fi
-#==============================================================================
-is_true() {
-    #:"""
-    #: .. function:: is_true()
-    #:
-    #: Check if a string is a standard true flag
-    #: Ref: https://github.com/fedora-sysv/initscripts)
-    #:
-    #: :param str boolean:   String to check
-    #:"""
-    case "${1}" in
-        [tT] | [yY] | [yY][eE][sS] | [tT][rR][uU][eE] | 1) return 0 ;;
-        *) return 1
-    esac
-}
-
-#==============================================================================
-is_false() {
-    #:"""
-    #: .. function:: is_false()
-    #:
-    #: Check if a string is a standard false flag
-    #: Ref: https://github.com/fedora-sysv/initscripts)
-    #:
-    #: :param str boolean:   String to check
-    #:"""
-    case "${1}" in
-        [fF] | [nN] | [nN][oO] | [fF][aA][lL][sS][eE] | 0) return 0 ;;
-        *) return 1
-    esac
-}
-
-#==============================================================================
-_usage() {
-    #:"""
-    #: .. function:: _usage()
-    #:
-    #: Provides usage information
-    #:
-    #: .. note::
-    #:     GNU does not recommend short options for help/version.
-    #:     I do not recommend short option for, nor display of, debug option.
-    #:     but I do recommend short option for help.
-    #:"""
-    printf 'Usage: %s [options]\n\n' "${__basename__}"
-    printf '%s\n\n' "${__synopsis__}"
-    printf 'Options:\n'
-    usage_options '  %s     %s\n'
-    printf '\n%s\n\n' "${__description__}"
-    printf 'Created: %s  Contact: %s\n' "${__created__}" "${__contact__}"
-    printf 'Revised: %s  Version: %s\n' "${__revised__}" "${__version__}"
-    printf '(c) Copyright %s (License: %s)\n'   "${__copyright__}" "${__license__}"
-    printf '%s, part of %s. Project home: %s\n' "${__cononical_name__}" \
-                                                "${__project_name__}" \
-                                                "${__project_home__}"
-
-    return
-}
-
-#==============================================================================
-_usage_ec() {
-    #:"""
-    #: .. function:: _usage_ec()
-    #:
-    #: Print reStructuredText-compatible table of exit conditions
-    #:
-    #:"""
-    # TODO: This is not yet POSIX-safe
-    __usage_ec_lst=$(grep exit_error "${__basename__}" \
-                    | sed 's/.*exit_error //g' \
-                    | grep '^[0-9]' \
-                    | sed 's/.[0-9-][0-9-]\.[0-9][0-9]//g' \
-                    | sed 's/ *;;//g' \
-                    | tr -d '"' | tr -d "'" \
-                    | sort -u | sort -n) # \
-        #| awk '{printf "| " $1 " | "; for (i=2; i<NF; i++) printf $i " "; print $NF " |"}'
-    while read -r __usage_ec_line ; do
-        __usage_ec_num="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f1)"
-        __usage_ec_des="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f2- | cut -c -67)"
-        printf '| %3d | %-67s |\n' "${__usage_ec_num}" "${__usage_ec_des}"
-    done <<< "${__usage_ec_lst}"
-
-    return
-}
-
-#==============================================================================
-_usage_rest() {
-    #:"""
-    #: .. function:: _usage_rest()
-    #:
-    #: Provides usage information in Sphinx/ReST format.
-    #:
-    #:"""
-    # {% raw %}
-    __usage_rest_char="%${#__cononical_name__}s" # {% endraw %}
-    #-- We are using a variable to format data in printf
-    # shellcheck disable=2059
-    printf "${__usage_rest_char}\\n" | tr " " "="
-    printf '%s\n' "${__cononical_name__}"
-    #-- We are using a variable to format data in printf
-    # shellcheck disable=2059
-    printf "${__usage_rest_char}\\n" | tr " " "="
-    printf '\n'
-    printf 'Synopsis\n'
-    printf '%s\n\n' '--------'
-    printf '**%s** [*options*]\n\n' "${__cononical_name__}" #: TODO: UPDATE usage
-    printf 'Description\n'
-    printf '%s\n\n' '-----------'
-    printf '%s\n\n' "${__description__}"
-    printf 'Options\n'
-    printf '%s\n\n' '-------'
-    usage_options '.. option:: %s\n\n    %s\n\n'
-    printf 'Author\n'
-    printf '%s\n\n' '------'
-    printf '%s\n\n' "${__author__}"
-    printf 'Copyright\n'
-    printf '%s\n\n' '------'
-    printf '(c) Copyright %s (License: %s)\n\n' "${__copyright__}" "${__license__}"
-
-    return
-}
-
-#==============================================================================
-_version() {
-    #:"""
-    #: .. function:: _version()
-    #:
-    #: Provides version information
-    #:
-    #: .. note::
-    #:     GNU guidelines dictate adding copyright and license info
-    #:"""
-    printf '%s (%s) %s\n' "${__cononical_name__}" "${__project_name__}" "${__version__}"
-    if is_true "${__gnu_version__}" ; then
-        printf 'Copyright %s\n' "${__copyright__}"
-        printf 'License %s\n' "${__license__}"
-    fi
-
-    return
-}
-
-#==============================================================================
 _debug_info() {
     #:"""
     #: .. function:: _debug_info()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
     #:
     #: Provides meta info for debug-level output
     #:
@@ -303,11 +177,137 @@ _debug_info() {
 
     return
 }
+#==============================================================================
+_usage() {
+    #:"""
+    #: .. function:: _usage()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Provides usage information
+    #:
+    #: .. note::
+    #:     GNU does not recommend short options for help/version.
+    #:     I do not recommend short option for, nor display of, debug option.
+    #:     but I do recommend short option for help.
+    #:"""
+    printf 'Usage: %s [options]\n\n' "${__basename__}"
+    printf '%s\n\n' "${__synopsis__}"
+    printf 'Options:\n'
+    usage_options '  %s     %s\n'
+    printf '\n%s\n\n' "${__description__}"
+    printf 'Created: %s  Contact: %s\n' "${__created__}" "${__contact__}"
+    printf 'Revised: %s  Version: %s\n' "${__revised__}" "${__version__}"
+    printf '(c) Copyright %s (License: %s)\n'   "${__copyright__}" "${__license__}"
+    printf '%s, part of %s. Project home: %s\n' "${__cononical_name__}" \
+                                                "${__project_name__}" \
+                                                "${__project_home__}"
 
+    return
+}
+#==============================================================================
+_usage_rest() {
+    #:"""
+    #: .. function:: _usage_rest()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Provides usage information in Sphinx/ReST format.
+    #:
+    #:"""
+    # {% raw %}
+    __usage_rest_char="%${#__cononical_name__}s" # {% endraw %}
+    #-- We are using a variable to format data in printf
+    # shellcheck disable=2059
+    printf "${__usage_rest_char}\\n" | tr " " "="
+    printf '%s\n' "${__cononical_name__}"
+    #-- We are using a variable to format data in printf
+    # shellcheck disable=2059
+    printf "${__usage_rest_char}\\n" | tr " " "="
+    printf '\n'
+    printf 'Synopsis\n'
+    printf '%s\n\n' '--------' "${__synopsis__}"
+    printf '**%s** [*options*]\n\n' "${__cononical_name__}" #: TODO: UPDATE usage
+    printf 'Description\n'
+    printf '%s\n\n' '-----------'
+    printf '%s\n\n' "${__description__}"
+    printf 'Options\n'
+    printf '%s\n\n' '-------'
+    usage_options '.. option:: %s\n\n    %s\n\n'
+    printf 'Author\n'
+    printf '%s\n\n' '------'
+    printf '%s\n\n' "${__author__}"
+    printf 'Copyright\n'
+    printf '%s\n\n' '------'
+    printf '(c) Copyright %s (License: %s)\n\n' "${__copyright__}" "${__license__}"
+
+    return
+}
+#==============================================================================
+_version() {
+    #:"""
+    #: .. function:: _version()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Provides version information
+    #:
+    #: .. note::
+    #:     GNU guidelines dictate adding copyright and license info
+    #:"""
+    printf '%s (%s) %s\n' "${__cononical_name__}" "${__project_name__}" "${__version__}"
+    if [ "${__gnu_version__}" = 'True' ]; then
+        printf 'Copyright %s\n' "${__copyright__}"
+        printf 'License %s\n' "${__license__}"
+    fi
+
+    return
+}
+#==============================================================================
+exit_clean() {
+    #:"""
+    #: .. function:: exit_clean()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Clean up everything and exit gracefully
+    #: .. warning::
+    #:     This function exits the script
+    #:"""
+    [ "${__script_debug__}" = true ] && {
+        set +o xtrace
+        logger debug '-----------------'
+        logger debug '------ end ------'
+        logger debug '-----------------'
+        __script_debug__=false
+    }
+
+    trap - INT TERM HUP
+    if [ "${__logger_file_set__}" = "true" ]; then
+        printf '%s [EXIT]: Script finished.\n' "$(timestamp "${__logger_dsf__}")" 1>&3
+        printf 'Log file created: %s\n' "${__logger_file__}"
+        exec 3>&-
+    fi
+    exit 0
+
+    return
+}
 #==============================================================================
 _exit_trap() {
     #:"""
-    #: .. function:: exit_trap()
+    #: .. function:: exit_error()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
     #:
     #: On terminal traps, run this before exit_error
     #:
@@ -318,11 +318,189 @@ _exit_trap() {
     #:"""
     exit_error "${?}" "caught trap ${2} at line ${1}; exiting"
 }
+#:"""
+#: .. note::
+#:     Setting traps seprately for 2 reasons:
+#:
+#:         - Avoid calling "$(kill -l $((trap_num - 128)))" in exti_trap
+#:         - Incase we want to handle them differently in the future
+#:
+#: .. describe:: Bug
+#:     Passing LINENO may not be working as expected, need more real-world tests
+#:"""
+trap '_exit_trap ${LINENO} INT'  INT
+trap '_exit_trap ${LINENO} TERM' TERM
+trap '_exit_trap ${LINENO} HUP'  HUP
+#==============================================================================
+exit_error() {
+    #:"""
+    #: .. function:: exit_error()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Report error and exit
+    #:
+    #: :param int error_number:  Number to use for Exit Code
+    #: :param str error_string:  Short description of error
+    #: .. note::
+    #:     You may want to use ${LINENO} in the string this is called with.
+    #: .. warning::
+    #:     This function exits the script
+    #:"""
+    if [ "${#}" -eq 2 ] ; then # {% endraw %}
+        __exit_error_code="${1}"
+        __exit_error_mess="${2}"
+    else
+        __exit_error_code=128
+        __exit_error_mess='Invalid arguments for exit_error()'
+    fi
 
+    trap - INT TERM HUP
+    printf '%s: %s\n' "${cf_red}${__cononical_name__}" \
+                      "${c_bold}${__exit_error_mess}${c_reset}" 1>&2
+    if [ "${__logger_file_set__}" = "true" ]; then
+        printf '%s [EXIT]: %s\n' "$(timestamp "${__logger_dsf__}")" "${__exit_error_mess}" 1>&3
+        printf 'Log file created: %s\n' "${__logger_file__}"
+        exec 3>&-
+    fi
+    exit "${__exit_error_code}"
+}
+#==============================================================================
+get_platform_tag() {
+    #:"""
+    #: .. function:: get_platform_tag()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Identify underlining 'hardware' platform and return tag.
+    #:
+    #: .. note:: FKA identify_platform()
+    #:"""
+    __get_platform_tag='unknown'
+    if [ -f '/sys/devices/virtual/dmi/id/sys_vendor' ] ; then
+        __get_platform_tag_sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor)"
+        case "${__get_platform_tag_sys_vendor}" in
+            'Microsoft Corporation') __get_platform_tag='azure' ;;
+            'VMware, Inc.')          __get_platform_tag='vmware' ;;
+            'innotek GmbH')          __get_platform_tag='vbox' ;;
+            *)                       __get_platform_tag='other' ;;
+        esac
+    fi
+
+    printf '%s' "${__get_platform_tag}"
+    return
+}
+#==============================================================================
+get_temp() {
+    #:"""
+    #: .. function:: get_temp()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Creates a temporary file (or directory), returning the path. Defaults to file.
+    #:
+    #: :param str directory:   Pass any substring of 'directory' to create a directory
+    #:
+    #:"""
+    __get_temp_dir='' # {% raw %}
+    if [ "${#}" -eq 1 ] ; then # {% endraw %}
+        case 'directory' in
+            *${1}*) __get_temp_dir='-d' ;;
+            *)      ;;
+        esac ;
+    fi
+    if command -v mktemp >/dev/null 2>&1; then
+        mktemp ${__get_temp_dir} -t "${__cononical_name__}${__get_temp_dir}.XXXXXXXXXX" || return "${?}"
+    else
+        if [ "${__get_temp_dir}" = '' ]; then
+            __get_temp_path="/tmp/${__cononical_name__}.${$}"
+            touch "${__get_temp_path}" || return "${?}"
+        else
+            __get_temp_path="/tmp/${__cononical_name__}-d.${$}"
+            mkdir "${__get_temp_path}" || return "${?}"
+        fi
+        printf '%s' "${__get_temp_path}"
+    fi
+
+    return
+}
+#==============================================================================
+is_false() {
+    #:"""
+    #: .. function:: is_false()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Check if a string is a standard false flag
+    #: Ref: https://github.com/fedora-sysv/initscripts)
+    #:
+    #: :param str boolean:   String to check
+    #:"""# {% raw %}
+    if [ "${#}" -ne 1 ] ; then # {% endraw %}
+        return 64
+    fi
+    case "${1}" in
+        [fF] | [nN] | [nN][oO] | [fF][aA][lL][sS][eE] | 0) return 0 ;;
+        *) return 1
+    esac
+}
+#==============================================================================
+is_true() {
+    #:"""
+    #: .. function:: is_true()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Check if a string is a standard true flag
+    #: Ref: https://github.com/fedora-sysv/initscripts)
+    #:
+    #: :param str boolean:   String to check
+    #:"""# {% raw %}
+    if [ "${#}" -ne 1 ] ; then # {% endraw %}
+        return 64
+    fi
+    case "${1}" in
+        [tT] | [yY] | [yY][eE][sS] | [tT][rR][uU][eE] | 1) return 0 ;;
+        *) return 1
+    esac
+}
+#==============================================================================
+is_in_string() {
+    #:"""
+    #: .. function:: is_in_string()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Check if a substring is in a string
+    #:
+    #: :param str needle:   Substring to search for
+    #: :param str heystack: String to search in
+    #:"""
+    case "${2}" in
+        *${1}*) return 0 ;;
+        *)      return 1 ;;
+    esac ;
+}
 #==============================================================================
 logger() {
     #:"""
     #: .. function:: logger()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
     #:
     #: Provides an interface similar to Python's logging module
     #:
@@ -343,13 +521,13 @@ logger() {
     esac
     shift
 
-    if is_true "${__logger_file_set__}" ; then
+    if [ "${__logger_file_set__}" = "true" ]; then
         printf '%s [%s]: %s\n' "$(timestamp "${__logger_dsf__}")" \
                                "${__logger_action_tag}" "${@}" 1>&3
     fi
 
     if [ "${__logger_lvl__}" -le "${__logger_log_level_th}" ]; then
-        if is_true "${__script_debug__}" ; then
+        if [ "${__script_debug__}" = true ]; then
             printf '%s %-10s ' "${cf_blue}$(timestamp "${__logger_dsf__}")" \
                                "${__logger_action_tag}${c_reset}"
         fi
@@ -368,179 +546,82 @@ logger() {
 
     return
 }
-
-#==============================================================================
-timestamp() {
-    #:"""
-    #: .. function:: timestamp()
-    #:
-    #: Return date in specified format
-    #:
-    #: :param str datestamp_format:  Format string for 'date' command
-    #:"""# {% raw %}
-    if [ "${#}" -eq 0 ]; then # {% endraw %}
-        date "${__default_dsf__}"
-    else
-        date "${1}"
-    fi
-
-    return
-}
-
-#==============================================================================
-exit_error() {
-    #:"""
-    #: .. function:: exit_error()
-    #:
-    #: Report error and exit
-    #:
-    #: :param int error_number:  Number to use for Exit Code
-    #: :param str error_string:  Short description of error
-    #: .. note::
-    #:     You may want to use ${LINENO} in the string this is called with.
-    #: .. warning::
-    #:     This function exits the script
-    #:"""
-    printf '%s: %s\n' "${cf_red}${__cononical_name__}" \
-                      "${c_bold}${2}${c_reset}" 1>&2
-    if is_true "${__logger_file_set__}" ; then
-        printf '%s [EXIT]: %s\n' "$(timestamp "${__logger_dsf__}")" "${2}" 1>&3
-        printf 'Log file created: %s\n' "${__logger_file__}"
-        exec 3>&-
-    fi
-    exit "${1}"
-}
-
-#==============================================================================
-exit_clean() {
-    #:"""
-    #: .. function:: exit_clean()
-    #:
-    #: Clean up everything and exit gracefully
-    #: .. warning::
-    #:     This function exits the script
-    #:"""
-    if is_true "${__script_debug__}" ; then
-        set +o xtrace
-        logger debug '-----------------'
-        logger debug '------ end ------'
-        logger debug '-----------------'
-        __script_debug__=false
-    fi
-
-    trap - INT TERM HUP
-    if is_true "${__logger_file_set__}" ; then
-        printf '%s [EXIT]: Script finished.\n' "$(timestamp "${__logger_dsf__}")" 1>&3
-        printf 'Log file created: %s\n' "${__logger_file__}"
-        exec 3>&-
-    fi
-    exit 0
-}
-
-#==============================================================================
-get_temp() {
-    #:"""
-    #: .. function:: get_temp_dir()
-    #:
-    #: Creates a temporary file (or directory), returning the path. Defaults to file.
-    #:
-    #: :param str directory:   Pass any substring of 'directory' to create a directory
-    #:"""
-    # {% raw %}
-    if [ "${#}" -eq 1 ] && is_in_string "${1}" "directory"; then  # {% endraw %}
-        __get_temp_dir='-d'
-    else
-        __get_temp_dir=''
-    fi
-    if command -v mktemp >/dev/null 2>&1; then
-        mktemp ${__get_temp_dir} -t "${__cononical_name__}${__get_temp_dir}.XXXXXXXXXX" || return "${?}"
-    else
-        if [ "${__get_temp_dir}" = '' ]; then
-            __get_temp_path="/tmp/${__cononical_name__}.${$}"
-            touch "${__get_temp_path}" || return "${?}"
-        else
-            __get_temp_path="/tmp/${__cononical_name__}-d.${$}"
-            mkdir "${__get_temp_path}" || return "${?}"
-        fi
-        printf '%s' "${__get_temp_path}"
-    fi
-
-    return
-}
-
-#==============================================================================
-is_in_string() {
-    #:"""
-    #: .. function:: is_in_string()
-    #:
-    #: Check if a substring is in a string
-    #:
-    #: :param str needle:   Substring to search for
-    #: :param str heystack: String to search in
-    #:"""
-    case "${2}" in
-        *${1}*) return 0 ;;
-        *)      return 1 ;;
-    esac ;
-}
-
 #==============================================================================
 set_value() {
     #:"""
     #: .. function:: set_value()
     #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
     #: Add or change a KEY to a VALUE in a FILE, creating FILE if necessary.
     #:
-    #: :param str file:   File to create/modify
-    #: :param str key:    Key to create/modify
-    #: :param str value:  Value to set key to
-    #: :param str quote:  set to 'noquote' if value is to be unquoted
-    #:"""
+    #: :param str file:   FILE to create/modify
+    #: :param str key:    KEY to create/modify
+    #: :param str value:  VALUE to set key to
+    #: :param str quote:  set to 'noquote' if VALUE should not be quoted
+    #:"""# {% raw %}
+    if [ "${#}" -ne 3 ] && [ "${#}" -ne 4 ] ; then # {% endraw %}
+        return 64
+    fi
     __set_value_file="${1}"
     __set_value_key="${2}"
     __set_value_value="${3}"
-    __set_value_quote="${4:="quote"}"
-    if [ ! -e "${__set_value_file}" ]; then touch "${__set_value_file}" || return "${?}"; fi
-    if [ "${__set_value_quote}" = 'noquote' ] ; then
-        :
-    else
+    if ! [ "${4}" = 'noquote' ] ; then
         __set_value_value="'${__set_value_value}'"
     fi
-    if grep -q "^${__set_value_key} *=" "${__set_value_file}"; then
-        sed -i -E "s|^${__set_value_key} *=.*|${__set_value_key}=${__set_value_value}|" "${__set_value_file}" || return "${?}"
+    if sed -h 2>&1 | grep -q '\-E' ; then
+        __set_value_sedopt='-E'
     else
-        printf '%s=%s\n' "${__set_value_key}" "${__set_value_value}" >> "${__set_value_file}" || return "${?}"
+        __set_value_sedopt='-r'
+    fi
+
+    if [ ! -e "${__set_value_file}" ] ; then
+        touch "${__set_value_file}" || return "${?}"
+    fi
+    if grep -q "^${__set_value_key}=" "${__set_value_file}" ; then
+        sed -i ${__set_value_sedopt} \
+            "s|^${__set_value_key} *=.*|${__set_value_key}=${__set_value_value}|" \
+            "${__set_value_file}" || return "${?}"
+    else
+        printf '%s=%s\n' "${__set_value_key}" "${__set_value_value}" \
+            >> "${__set_value_file}" || return "${?}"
     fi
 
     return
 }
-
 #==============================================================================
-identify_platform() {
+timestamp() {
     #:"""
-    #: .. function:: identify_platform()
+    #: .. function:: timestamp()
     #:
-    #: Identify underlining 'hardware' platform and return tag.
-    #:"""
-    if [ -f '/sys/devices/virtual/dmi/id/sys_vendor' ] ; then
-        __identify_platform_sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor)"
-        case "${__identify_platform_sys_vendor}" in
-            'Microsoft Corporation') printf 'azure' ;;
-            'VMware, Inc.')          printf 'vmware' ;;
-            'innotek GmbH')          printf 'vbox' ;;
-            *)                       printf 'other' ;;
-        esac
+    #: Return a timestamp in a defined format.
+    #:
+    #: :param str array: Any params accepted by the date(1) command.
+    #: :return: The date string. Ideally without whitespace.
+    #: :rtype: str
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 20190626-1220
+    #:"""# {% raw %}
+    if [ "${#}" -eq 0 ]; then # {% endraw %}
+        date "${__default_dsf__}" || return "${?}"
     else
-        printf 'unknown'
+        date "${@}" || return "${?}"
     fi
 
     return
 }
-
 #==============================================================================
 init() {
     #:"""
     #: .. function:: init()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
     #:
     #: Check for requirements, other set-up stuff
     #:"""
@@ -573,18 +654,27 @@ init() {
     #--------------------------------------------------------------------------
     return
 }
-
 #==============================================================================
 usage_options() {
     #:"""
     #: .. function:: usage_options()
     #:
-    #: Lists options usign format passed to it.
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:"""
     #:
     #: :param str option_strfmt: The format to use.
     #:"""
-    #-- TODO: UPDATE option list.
-    __usage_option_strfmt="${1}"
+    #-- TODO: UPDATE option list.# {% raw %}
+    if [ "${#}" -eq 1 ] ; then
+        __usage_option_strfmt="${1}"
+    elif [ "${#}" -eq 0 ] ; then # {% endraw %}
+        __usage_option_strfmt='%s (%s)\n'
+    else
+        return 64
+    fi
+
     #-- We are using a variable to format data in printf
     # shellcheck disable=2059
     printf "${__usage_option_strfmt}" '--help, -h' 'Dislay this help'
@@ -594,29 +684,13 @@ usage_options() {
 
     return
 }
-
 #==============================================================================
-#:"""
-#: .. note::
-#:     Setting traps seprately for 2 reasons:
-#:
-#:         - Avoid calling "$(kill -l $((trap_num - 128)))" in exti_trap
-#:         - Incase we want to handle them differently in the future
-#:
-#: .. describe:: Bug
-#:     Passing LINENO may not be working as expected, need more real-world tests
-#:"""
-trap '_exit_trap ${LINENO} INT'  INT
-trap '_exit_trap ${LINENO} TERM' TERM
-trap '_exit_trap ${LINENO} HUP'  HUP
-
-#-- Process options (ignore --debug, as we already checked)
+#-- Process options
 #   NOTE: this is not optimal, but is an attempt to keep things POSIX
 #         compliant. If you are expecting arguments instead of params,
 #         be sure to assign them... somehow...
 #   Be sure to update usage_options() as well
 # {% raw %}
-# [ "${#}" -gt 0 ] && while :; do
 while [ "${#}" -gt 0 ]; do  # {% endraw %}
     case "${1}" in
         --debug)     __script_debug__='true'
@@ -632,7 +706,9 @@ while [ "${#}" -gt 0 ]; do  # {% endraw %}
 
     shift
 done
-
+#==============================================================================
+#: .. section:: Body -- This is where The Magic(TM) happens
+#: .. revision:: 2019-06-28
 init
 
 #==============================================================================
