@@ -8,9 +8,10 @@
 # Revised:    {{ date|default("TODO: CHANGEME", true) }}
 # Created:    {{ date|default("TODO: CHANGEME", true) }}
 #==============================================================================
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
-load 'libs/bats-file/load'
+load "${BATS_INSTALL}/support/load.bash"
+load "${BATS_INSTALL}/assert/load.bash"
+load "${BATS_INSTALL}/file/load.bash"
+#------------------------------------------------------------------------------
 
 @test '' {
 
