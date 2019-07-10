@@ -1,6 +1,7 @@
 #!/bin/sh
 #-- NOTE: Default to POSIX shell/mode. Be mindful of your reasons before
 #--       switching to Bash, and consider using Python instead...
+#-- WARNING: This is a constructed script. Edit the components, not the full file.
 #==============================================================================
 #:"""
 #: .. program:: {{ script_name|default("TODO: CHANGEME", true) }}
@@ -27,12 +28,12 @@
 #:"""
 #==============================================================================
 #: .. section:: Preamble (script-specific vars -- override this)
-#: .. revision:: 2019-06-28
+#: .. revision:: 2019-07-10
 #------------------------------------------------------------------------------
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: UPDATE meta vars
 __version__='{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__='20190628-173643' #: date of most recent revision
+__revised__='20190710-125741' #: date of most recent revision
 __contact__='{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__='{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__="
@@ -60,10 +61,10 @@ __license__='{{ software_license|default("TODO: CHANGEME", true) }}'
 __cononical_name__='{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__='{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__='{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
-__template_version__='2.13.0'  #: version of template file used
+__template_version__='3.0.0'  #: version of template file used
 #==============================================================================
 #: .. section:: General variables & settings
-#: .. revision:: 2019-06-28
+#: .. revision:: 2019-07-05
 #------------------------------------------------------------------------------
 __basename__="${0}"                                    #: name script run as
 #-- We are not using this variable for now.
@@ -73,16 +74,16 @@ __original_args__="${*}"    #: capture original arg list before messing with it
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
 __default_dsf__=${DEFAULT_TIMESTAMP:="+%Y%m%d-%H%M%S"} #: Default format for 'date' command
-__logger_dsf__=${LOGGER_DSF:="+%Y%m%d-%H%M%S"}         #: Debug logging output format for 'date' command
+__logln_dsf__=${LOGGER_DSF:="+%Y%m%d-%H%M%S"}         #: Debug logging output format for 'date' command
 __backup_dsf__=${BACKUP_DSF:="+%Y%m%d-%H%M%S"}         #: Backup file format for 'date' command
-__logger_file__=${LOGGER_FILE:="nil"}                  #: Path & name of log file to use
+__logln_file__=${LOGGER_FILE:="nil"}                  #: Path & name of log file to use
 case "$(printf '%s' "${LOGGER_LVL:="info"}" | tr '[:upper:]' '[:lower:]')" in
-    debug)          __logger_lvl__=10 ;;
-    info)           __logger_lvl__=20 ;;
-    warn|warning)   __logger_lvl__=30 ;;
-    error)          __logger_lvl__=40 ;;
-    crit|critical)  __logger_lvl__=50 ;;
-    *)              __logger_lvl__=0 ;;
+    debug)          __logln_lvl__=10 ;;
+    info)           __logln_lvl__=20 ;;
+    warn|warning)   __logln_lvl__=30 ;;
+    error)          __logln_lvl__=40 ;;
+    crit|critical)  __logln_lvl__=50 ;;
+    *)              __logln_lvl__=0 ;;
 esac
 #------------------------------------------------------------------------------
 #-- Load colors from environment variables, or set to empty
@@ -137,7 +138,7 @@ _debug_info() {
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
     #: Provides meta info for debug-level output
     #:
@@ -147,33 +148,33 @@ _debug_info() {
     # shellcheck disable=SC1007
     script_path="$(CDPATH= cd -- "$(dirname -- "${0}")" && pwd )"
 
-    logger debug "Cononical: ${__cononical_name__}"
-    logger debug "Abs Path:  ${script_path}/${__basename__}"
-    logger debug "Args List: ${__original_args__}"
-    logger debug "Version:   ${__version__}"
-    logger debug "md5sum:    $(md5sum "${__basename__}" 2>&1)"
-    logger debug "Created:   ${__created__}"
-    logger debug "Revised:   ${__revised__}"
-    logger debug "Coder(s):  ${__author__}"
-    logger debug "Contact:   ${__contact__}"
-    logger debug "Project:   ${__project_name__}"
-    logger debug "Project Home: ${__project_home__}"
-    logger debug "Template Version: ${__template_version__}"
-    logger debug "System:    $(uname -orv 2>&1)"
-    logger debug "Hostname:  $(hostname 2>&1)"
-    logger debug "Logname:   ${USERNAME:=$(logname 2>&1)}"
-    logger debug "[re]uid:   $(id -ur 2>&1)/$(id -u 2>&1)"
-    logger debug "PID/PPID:  ${$}/${PPID}"
+    logln debug "Cononical: ${__cononical_name__}"
+    logln debug "Abs Path:  ${script_path}/${__basename__}"
+    logln debug "Args List: ${__original_args__}"
+    logln debug "Version:   ${__version__}"
+    logln debug "md5sum:    $(md5sum "${__basename__}" 2>&1)"
+    logln debug "Created:   ${__created__}"
+    logln debug "Revised:   ${__revised__}"
+    logln debug "Coder(s):  ${__author__}"
+    logln debug "Contact:   ${__contact__}"
+    logln debug "Project:   ${__project_name__}"
+    logln debug "Project Home: ${__project_home__}"
+    logln debug "Template Version: ${__template_version__}"
+    logln debug "System:    $(uname -orv 2>&1)"
+    logln debug "Hostname:  $(hostname 2>&1)"
+    logln debug "Logname:   ${USERNAME:=$(logname 2>&1)}"
+    logln debug "[re]uid:   $(id -ur 2>&1)/$(id -u 2>&1)"
+    logln debug "PID/PPID:  ${$}/${PPID}"
     if [ -x /bin/pstree ] || [ -x /usr/bin/pstree ] ; then
         if pstree -psu ${$} 1>/dev/null 2>&1 ; then
-            logger debug "pstree psu: $(pstree -psu ${$})"
+            logln debug "pstree psu: $(pstree -psu ${$})"
         else
-            logger debug "pstree pu: $(pstree -pu ${$})"
+            logln debug "pstree pu: $(pstree -pu ${$})"
         fi
     fi
-    logger debug '-----------------'
-    logger debug '----- start -----'
-    logger debug '-----------------'
+    logln debug '-----------------'
+    logln debug '----- start -----'
+    logln debug '-----------------'
 
     return
 }
@@ -204,6 +205,34 @@ _usage() {
     printf '%s, part of %s. Project home: %s\n' "${__cononical_name__}" \
                                                 "${__project_name__}" \
                                                 "${__project_home__}"
+
+    return
+}
+#==============================================================================
+_usage_ec() {
+    #:"""
+    #: .. function:: _usage_ec()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Print reStructuredText-compatible table of exit conditions
+    #:"""
+    # NOTE: This is not yet POSIX-safe
+    __usage_ec_lst=$(grep exit_error "${__basename__}" \
+                    | sed 's/.*exit_error //g' \
+                    | grep '^[0-9]' \
+                    | sed 's/.[0-9-][0-9-]\.[0-9][0-9]//g' \
+                    | sed 's/ *;;//g' \
+                    | tr -d '"' | tr -d "'" \
+                    | sort -u | sort -n) # \
+        #| awk '{printf "| " $1 " | "; for (i=2; i<NF; i++) printf $i " "; print $NF " |"}'
+    while read -r __usage_ec_line ; do
+        __usage_ec_num="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f1)"
+        __usage_ec_des="$(printf '%s' "${__usage_ec_line}" | cut -d' ' -f2- | cut -c -67)"
+        printf '| %3d | %-67s |\n' "${__usage_ec_num}" "${__usage_ec_des}"
+    done <<< "${__usage_ec_lst}"
 
     return
 }
@@ -276,7 +305,7 @@ exit_clean() {
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
     #: Clean up everything and exit gracefully
     #: .. warning::
@@ -284,16 +313,16 @@ exit_clean() {
     #:"""
     [ "${__script_debug__}" = true ] && {
         set +o xtrace
-        logger debug '-----------------'
-        logger debug '------ end ------'
-        logger debug '-----------------'
+        logln debug '-----------------'
+        logln debug '------ end ------'
+        logln debug '-----------------'
         __script_debug__=false
     }
 
     trap - INT TERM HUP
-    if [ "${__logger_file_set__}" = "true" ]; then
-        printf '%s [EXIT]: Script finished.\n' "$(timestamp "${__logger_dsf__}")" 1>&3
-        printf 'Log file created: %s\n' "${__logger_file__}"
+    if [ "${__logln_file_set__}" = "true" ]; then
+        printf '%s [EXIT]: Script finished.\n' "$(get_timestamp "${__logln_dsf__}")" 1>&3
+        printf 'Log file created: %s\n' "${__logln_file__}"
         exec 3>&-
     fi
     exit 0
@@ -338,7 +367,7 @@ exit_error() {
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
     #: Report error and exit
     #:
@@ -360,72 +389,32 @@ exit_error() {
     trap - INT TERM HUP
     printf '%s: %s\n' "${cf_red}${__cononical_name__}" \
                       "${c_bold}${__exit_error_mess}${c_reset}" 1>&2
-    if [ "${__logger_file_set__}" = "true" ]; then
-        printf '%s [EXIT]: %s\n' "$(timestamp "${__logger_dsf__}")" "${__exit_error_mess}" 1>&3
-        printf 'Log file created: %s\n' "${__logger_file__}"
+    if [ "${__logln_file_set__}" = "true" ]; then
+        printf '%s [EXIT]: %s\n' "$(get_timestamp "${__logln_dsf__}")" "${__exit_error_mess}" 1>&3
+        printf 'Log file created: %s\n' "${__logln_file__}"
         exec 3>&-
     fi
     exit "${__exit_error_code}"
 }
 #==============================================================================
-get_platform_tag() {
+get_timestamp() {
     #:"""
-    #: .. function:: get_platform_tag()
+    #: .. function:: get_timestamp()
+    #:
+    #: Return a timestamp in a defined format.
+    #:
+    #: :param str array: Any params accepted by the date(1) command.
+    #: :return: The date string. Ideally without whitespace.
+    #: :rtype: str
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
-    #:
-    #: Identify underlining 'hardware' platform and return tag.
-    #:
-    #: .. note:: FKA identify_platform()
-    #:"""
-    __get_platform_tag='unknown'
-    if [ -f '/sys/devices/virtual/dmi/id/sys_vendor' ] ; then
-        __get_platform_tag_sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor)"
-        case "${__get_platform_tag_sys_vendor}" in
-            'Microsoft Corporation') __get_platform_tag='azure' ;;
-            'VMware, Inc.')          __get_platform_tag='vmware' ;;
-            'innotek GmbH')          __get_platform_tag='vbox' ;;
-            *)                       __get_platform_tag='other' ;;
-        esac
-    fi
-
-    printf '%s' "${__get_platform_tag}"
-    return
-}
-#==============================================================================
-get_temp() {
-    #:"""
-    #: .. function:: get_temp()
-    #:
-    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
-    #:
-    #: .. revision:: 2019-06-28
-    #:
-    #: Creates a temporary file (or directory), returning the path. Defaults to file.
-    #:
-    #: :param str directory:   Pass any substring of 'directory' to create a directory
-    #:
-    #:"""
-    __get_temp_dir='' # {% raw %}
-    if [ "${#}" -eq 1 ] ; then # {% endraw %}
-        case 'directory' in
-            *${1}*) __get_temp_dir='-d' ;;
-            *)      ;;
-        esac ;
-    fi
-    if command -v mktemp >/dev/null 2>&1; then
-        mktemp ${__get_temp_dir} -t "${__cononical_name__}${__get_temp_dir}.XXXXXXXXXX" || return "${?}"
+    #: .. revision:: 20190705-1050
+    #:"""# {% raw %}
+    if [ "${#}" -eq 0 ]; then # {% endraw %}
+        date "${__default_dsf__}" || return "${?}"
     else
-        if [ "${__get_temp_dir}" = '' ]; then
-            __get_temp_path="/tmp/${__cononical_name__}.${$}"
-            touch "${__get_temp_path}" || return "${?}"
-        else
-            __get_temp_path="/tmp/${__cononical_name__}-d.${$}"
-            mkdir "${__get_temp_path}" || return "${?}"
-        fi
-        printf '%s' "${__get_temp_path}"
+        date "${@}" || return "${?}"
     fi
 
     return
@@ -453,6 +442,25 @@ is_false() {
     esac
 }
 #==============================================================================
+is_in_string() {
+    #:"""
+    #: .. function:: is_in_string()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-06-28
+    #:
+    #: Check if a substring is in a string
+    #:
+    #: :param str needle:   Substring to search for
+    #: :param str heystack: String to search in
+    #:"""
+    case "${2}" in
+        *${1}*) return 0 ;;
+        *)      return 1 ;;
+    esac ;
+}
+#==============================================================================
 is_true() {
     #:"""
     #: .. function:: is_true()
@@ -475,85 +483,49 @@ is_true() {
     esac
 }
 #==============================================================================
-is_in_string() {
+mk_tmp() {
     #:"""
-    #: .. function:: is_in_string()
+    #: .. function:: mk_tmp()
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
-    #: Check if a substring is in a string
+    #: Creates a temporary file (or directory), returning the path. Defaults to file.
     #:
-    #: :param str needle:   Substring to search for
-    #: :param str heystack: String to search in
+    #: :param str directory:   Pass any substring of 'directory' to create a directory
+    #:
     #:"""
-    case "${2}" in
-        *${1}*) return 0 ;;
-        *)      return 1 ;;
-    esac ;
-}
-#==============================================================================
-logger() {
-    #:"""
-    #: .. function:: logger()
-    #:
-    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
-    #:
-    #: .. revision:: 2019-06-28
-    #:
-    #: Provides an interface similar to Python's logging module
-    #:
-    #: :param str log_level:     String indicating log level
-    #: :param str log_string:    String to print
-    #: .. note::
-    #:     This was inspired by tinylogger (Copyright (c) 2017 Nagarjuna
-    #:     Kumarappan), but I think there is very little left of the original
-    #:     code here. See: https://github.com/nk412/tinylogger
-    #:"""
-    case "$(printf '%s' "${1}")" in
-        debug)          __logger_action_tag='DEBUG'    ; __logger_log_level_th=10 ;;
-        info)           __logger_action_tag='INFO'     ; __logger_log_level_th=20 ;;
-        warn|warning)   __logger_action_tag='WARNING'  ; __logger_log_level_th=30 ;;
-        error)          __logger_action_tag='ERROR'    ; __logger_log_level_th=40 ;;
-        crit|critical)  __logger_action_tag='CRITICAL' ; __logger_log_level_th=50 ;;
-        *)              __logger_action_tag='UNKNOWN'  ; __logger_log_level_th=0 ;;
-    esac
-    shift
-
-    if [ "${__logger_file_set__}" = "true" ]; then
-        printf '%s [%s]: %s\n' "$(timestamp "${__logger_dsf__}")" \
-                               "${__logger_action_tag}" "${@}" 1>&3
+    __mk_tmp_dir='' # {% raw %}
+    if [ "${#}" -eq 1 ] ; then # {% endraw %}
+        case 'directory' in
+            *${1}*) __mk_tmp_dir='-d' ;;
+            *)      ;;
+        esac ;
     fi
-
-    if [ "${__logger_lvl__}" -le "${__logger_log_level_th}" ]; then
-        if [ "${__script_debug__}" = true ]; then
-            printf '%s %-10s ' "${cf_blue}$(timestamp "${__logger_dsf__}")" \
-                               "${__logger_action_tag}${c_reset}"
-        fi
-        if [ "${__logger_log_level_th}" -le 10 ]; then
-            printf '%sdebug: %s%s\n' "${cf_green}" "${@}" "${c_reset}"
-        elif [ "${__logger_log_level_th}" -le 20 ]; then
-            printf '%s%s%s\n' "${cf_white}" "${@}" "${c_reset}"
-        elif [ "${__logger_log_level_th}" -le 30 ]; then
-            printf '%sWarning: %s%s\n' "${cf_yellow}" "${@}" "${c_reset}" 1>&2
-        elif [ "${__logger_log_level_th}" -le 40 ]; then
-            printf '%sError: %s%s\n' "${cf_magenta}" "${@}" "${c_reset}" 1>&2
+    if command -v mktemp >/dev/null 2>&1; then
+        mktemp ${__mk_tmp_dir} -t "${__cononical_name__}${__mk_tmp_dir}.XXXXXXXXXX" || return "${?}"
+    else
+        if [ "${__mk_tmp_dir}" = '' ]; then
+            __mk_tmp_path="/tmp/${__cononical_name__}.${$}"
+            touch "${__mk_tmp_path}" || return "${?}"
         else
-            printf '%sCRITICAL: %s%s\n' "${cf_red}" "${@}" "${c_reset}" 1>&2
+            __mk_tmp_path="/tmp/${__cononical_name__}-d.${$}"
+            mkdir "${__mk_tmp_path}" || return "${?}"
         fi
+        printf '%s' "${__mk_tmp_path}"
     fi
 
     return
 }
 #==============================================================================
-set_value() {
+set_value_in_file() {
     #:"""
-    #: .. function:: set_value()
+    #: .. function:: set_value_in_file()
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
     #: Add or change a KEY to a VALUE in a FILE, creating FILE if necessary.
     #:
@@ -565,51 +537,81 @@ set_value() {
     if [ "${#}" -ne 3 ] && [ "${#}" -ne 4 ] ; then # {% endraw %}
         return 64
     fi
-    __set_value_file="${1}"
-    __set_value_key="${2}"
-    __set_value_value="${3}"
+    __set_value_in_file_file="${1}"
+    __set_value_in_file_key="${2}"
+    __set_value_in_file_value="${3}"
     if ! [ "${4}" = 'noquote' ] ; then
-        __set_value_value="'${__set_value_value}'"
+        __set_value_in_file_value="'${__set_value_in_file_value}'"
     fi
     if sed -h 2>&1 | grep -q '\-E' ; then
-        __set_value_sedopt='-E'
+        __set_value_in_file_sedopt='-E'
     else
-        __set_value_sedopt='-r'
+        __set_value_in_file_sedopt='-r'
     fi
 
-    if [ ! -e "${__set_value_file}" ] ; then
-        touch "${__set_value_file}" || return "${?}"
+    if [ ! -e "${__set_value_in_file_file}" ] ; then
+        touch "${__set_value_in_file_file}" || return "${?}"
     fi
-    if grep -q "^${__set_value_key}=" "${__set_value_file}" ; then
-        sed -i ${__set_value_sedopt} \
-            "s|^${__set_value_key} *=.*|${__set_value_key}=${__set_value_value}|" \
-            "${__set_value_file}" || return "${?}"
+    if grep -q "^${__set_value_in_file_key}=" "${__set_value_in_file_file}" ; then
+        sed -i ${__set_value_in_file_sedopt} \
+            "s|^${__set_value_in_file_key} *=.*|${__set_value_in_file_key}=${__set_value_in_file_value}|" \
+            "${__set_value_in_file_file}" || return "${?}"
     else
-        printf '%s=%s\n' "${__set_value_key}" "${__set_value_value}" \
-            >> "${__set_value_file}" || return "${?}"
+        printf '%s=%s\n' "${__set_value_in_file_key}" "${__set_value_in_file_value}" \
+            >> "${__set_value_in_file_file}" || return "${?}"
     fi
 
     return
 }
 #==============================================================================
-timestamp() {
+logln() {
     #:"""
-    #: .. function:: timestamp()
-    #:
-    #: Return a timestamp in a defined format.
-    #:
-    #: :param str array: Any params accepted by the date(1) command.
-    #: :return: The date string. Ideally without whitespace.
-    #: :rtype: str
+    #: .. function:: logln()
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 20190626-1220
-    #:"""# {% raw %}
-    if [ "${#}" -eq 0 ]; then # {% endraw %}
-        date "${__default_dsf__}" || return "${?}"
-    else
-        date "${@}" || return "${?}"
+    #: .. revision:: 2019-07-05
+    #:
+    #: Provides an interface similar to Python's logging module
+    #:
+    #: :param str log_level:     String indicating log level
+    #: :param str log_string:    String to print
+    #: .. note::
+    #:     This was inspired by tinylogln (Copyright (c) 2017 Nagarjuna
+    #:     Kumarappan), but I think there is very little left of the original
+    #:     code here. See: https://github.com/nk412/tinylogln
+    #:"""
+    case "$(printf '%s' "${1}")" in
+        debug)          __logln_action_tag='DEBUG'    ; __logln_log_level_th=10 ;;
+        info)           __logln_action_tag='INFO'     ; __logln_log_level_th=20 ;;
+        warn|warning)   __logln_action_tag='WARNING'  ; __logln_log_level_th=30 ;;
+        error)          __logln_action_tag='ERROR'    ; __logln_log_level_th=40 ;;
+        crit|critical)  __logln_action_tag='CRITICAL' ; __logln_log_level_th=50 ;;
+        *)              __logln_action_tag='UNKNOWN'  ; __logln_log_level_th=0 ;;
+    esac
+    shift
+
+    if [ "${__logln_file_set__}" = "true" ]; then
+        printf '%s [%s]: %s\n' "$(get_timestamp "${__logln_dsf__}")" \
+                               "${__logln_action_tag}" "${@}" 1>&3
+    fi
+
+    if [ "${__logln_lvl__}" -le "${__logln_log_level_th}" ]; then
+        if [ "${__script_debug__}" = true ]; then
+            printf '%s %-10s ' "${cf_blue}$(get_timestamp "${__logln_dsf__}")" \
+                               "${__logln_action_tag}${c_reset}"
+        fi
+        if [ "${__logln_log_level_th}" -le 10 ]; then
+            printf '%sdebug: %s%s\n' "${cf_green}" "${@}" "${c_reset}"
+        elif [ "${__logln_log_level_th}" -le 20 ]; then
+            printf '%s%s%s\n' "${cf_white}" "${@}" "${c_reset}"
+        elif [ "${__logln_log_level_th}" -le 30 ]; then
+            printf '%sWarning: %s%s\n' "${cf_yellow}" "${@}" "${c_reset}" 1>&2
+        elif [ "${__logln_log_level_th}" -le 40 ]; then
+            printf '%sError: %s%s\n' "${cf_magenta}" "${@}" "${c_reset}" 1>&2
+        else
+            printf '%sCRITICAL: %s%s\n' "${cf_red}" "${@}" "${c_reset}" 1>&2
+        fi
     fi
 
     return
@@ -621,7 +623,7 @@ init() {
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
+    #: .. revision:: 2019-07-05
     #:
     #: Check for requirements, other set-up stuff
     #:"""
@@ -639,16 +641,16 @@ init() {
     fi
     #--------------------------------------------------------------------------
     #-- Set up log file
-    if [ "${__logger_file__}" != "nil" ]; then
-        mkdir -p "$(dirname "${__logger_file__}")"
-        if [ -f "${__logger_file__}" ] ; then
-            mv "${__logger_file__}" "${__logger_file__}"."$(timestamp "${__backup_dsf__}")"
+    if [ "${__logln_file__}" != "nil" ]; then
+        mkdir -p "$(dirname "${__logln_file__}")"
+        if [ -f "${__logln_file__}" ] ; then
+            mv "${__logln_file__}" "${__logln_file__}"."$(get_timestamp "${__backup_dsf__}")"
         fi
-        exec 3<> "${__logger_file__}" || exit 1
-        __logger_file_set__='true'
+        exec 3<> "${__logln_file__}" || exit 1
+        __logln_file_set__='true'
     else
         exec 3>&1 || exit 1
-        __logger_file_set__='false'
+        __logln_file_set__='false'
     fi
     _debug_info
     #--------------------------------------------------------------------------
@@ -661,8 +663,7 @@ usage_options() {
     #:
     #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
     #:
-    #: .. revision:: 2019-06-28
-    #:"""
+    #: .. revision:: 2019-07-10
     #:
     #: :param str option_strfmt: The format to use.
     #:"""
@@ -685,40 +686,56 @@ usage_options() {
     return
 }
 #==============================================================================
-#-- Process options
-#   NOTE: this is not optimal, but is an attempt to keep things POSIX
-#         compliant. If you are expecting arguments instead of params,
-#         be sure to assign them... somehow...
-#   Be sure to update usage_options() as well
-# {% raw %}
-while [ "${#}" -gt 0 ]; do  # {% endraw %}
-    case "${1}" in
-        --debug)     __script_debug__='true'
-                     __logger_lvl__=10 ;;
-        -h|--help)   _usage      && exit 0 ;;
-        --help-ec)   _usage_ec   && exit 0 ;;
-        --help-rest) _usage_rest && exit 0 ;;
-        --version)   _version    && exit 0 ;;
-        # --)          shift && break ;;
-        # -?*)         exit_error 64 "Invalid option: ${1}" ;;
-        *)           exit_error 64 "Invalid option: ${1}" ;;
-    esac
-
-    shift
-done
+parse_options() {
+    #:"""
+    #: .. function:: parse_options()
+    #:
+    #: .. project:: Shell Functions <https://github.com/awmyhr/shell-functions>
+    #:
+    #: .. revision:: 2019-07-10
+    #:
+    #: :param: This function should be passed the scripts $@.
+    #:
+    #: NOTE: this is not optimal, but is an attempt to keep things POSIX
+    #:       compliant. If you are expecting arguments instead of params,
+    #:       be sure to assign them... somehow...
+    #: Be sure to update usage_options() as well
+    #:"""
+    # {% raw %}
+    while [ "${#}" -gt 0 ]; do  # {% endraw %}
+        case "${1}" in
+            --debug)     __script_debug__='true'
+                         __logln_lvl__=10
+                         shift ;;
+            -h|--help)   _usage      && exit 0 ;;
+            --help-ec)   _usage_ec   && exit 0 ;;
+            --help-rest) _usage_rest && exit 0 ;;
+            --version)   _version    && exit 0 ;;
+            # -e|--exam)   EXAMPLE="${2}" && shift 2 ;;
+            # -f|--flage)  FLAG="true" && shift ;;
+            # --)          shift && break ;;
+            # -?*)         exit_error 64 "Invalid option: ${1}" ;;
+            *)           exit_error 64 "Invalid option: ${1}" ;;
+        esac
+    done
+}
 #==============================================================================
 #: .. section:: Body -- This is where The Magic(TM) happens
-#: .. revision:: 2019-06-28
+#: .. revision:: 2019-07-10
+main() {
+    #-- TODO: Do something more interesting here...{#
+    logln debug "this is a debug"
+    logln info  "this is an info"
+    logln warn  "this is a warning"
+    logln error "this is an error"
+    logln crit  "this is critical"
+    #}
+
+}
+#==============================================================================
+if [ "$(type -t parse_options 2>/dev/null)" = 'function' ] ; then
+    parse_options "${@}"
+fi
 init
-
-#==============================================================================
-#-- TODO: Do something more interesting here...{#
-logger debug "this is a debug"
-logger info  "this is an info"
-logger warn  "this is a warning"
-logger error "this is an error"
-logger crit  "this is critical"
-#}
-
-#==============================================================================
+main
 exit_clean
