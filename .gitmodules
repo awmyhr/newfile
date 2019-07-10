@@ -1,0 +1,3 @@
+[submodule "src/shell-functions"]
+	path = src/shell-functions
+	url = https://github.com/awmyhr/shell-functions

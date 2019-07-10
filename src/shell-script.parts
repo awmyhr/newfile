@@ -1,0 +1,28 @@
+# Author:     awmyhr <awmyhr@gmail.com>
+# Contact:    awmyhr <awmyhr@gmail.com>
+# Project:    Shell Functions
+# Proj Home:  https://github.com/awmyhr/shell-functions
+# Copyright:  2019 awmyhr
+# License:    Apache-2.0
+# Revised:    20190710-112849
+# Created:    2019-07-05
+#==============================================================================
+PreambleFull
+CommonVars
+_debug_info
+_usage
+_usage_ec
+_usage_rest
+_version
+exit_clean
+exit_error
+get_timestamp
+is_false
+is_in_string
+is_true
+mk_tmp
+set_value_in_file
+logln
+init
+parse_options
+Main
