@@ -1,0 +1,98 @@
+#!/usr/bin/python2 -tt
+# -*- coding: utf-8 -*-
+# Author:     awmyhr <awmyhr@gmail.com>
+# Contact:    awmyhr <awmyhr@gmail.com>
+# Project:    newfile
+# Proj Home:  https://github.com/awmyhr/newfile
+# Copyright:  2019 awmyhr
+# License:    Apache-2.0
+# Revised:    20191210
+# Created:    2019-12-10
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+import os           #: Misc. OS interfaces
+import sys          #: System-specific parameters & functions
+##--==
+#==============================================================================
+#-- Postscript v2.0.0-01
+if __name__ == '__main__':
+    #-- Setting up logger here so we can use them in even of exceptions.
+    #   Parsing options here as we need them to setup the logger.
+    options = Initilize(args=sys.argv[1:], vars=metavars)
+    logger = logging.getLogger(metavars['name'])
+    if metavars['flags']['require_root'] and os.getegid() != 0:
+        logger.error('Must be run as root.')
+        sys.exit(77)
+
+    #-- NOTE: "except Exception as variable:" syntax was added in 2.6, previously
+    #         one would use "except Exception, variable:", but that is not
+    #         compatible with 3.x. In order to be compatible with 2.5 (for RHEL 5)
+    #         and forward, we use "execpt Exception:", then on the first line of
+    #         the exception use "_, error, _ = sys.exc_info()". HOWEVER, pylint
+    #         will no longer be able to warn on object members...
+    #         type, value, traceback = sys.exc_info()
+    try:
+        main()
+    except KeyboardInterrupt: # Catches Ctrl-C
+        logger.debug('Caught Ctrl-C')
+        EXIT_STATUS = 130
+    except SystemExit as error: # Catches sys.exit()
+        #_, error, _ = sys.exc_info()
+        logger.debug('Caught SystemExit')
+        logger.warning('%s: [SystemExit] %s', __basename__, error)
+    except IOError as error:
+        #_, error, _ = sys.exc_info()
+        logger.debug('Caught IOError')
+        if error.errno is None:
+            logger.critical('%s: [IOError]: %s', __basename__, error)
+            EXIT_STATUS = 10
+        elif error.errno == 2:                #: No such file/directory
+            logger.critical('%s: [IOError] %s: %s', __basename__,
+                            error, error.filename
+                           )
+            EXIT_STATUS = os.EX_UNAVAILABLE
+        elif error.errno == 13:                #: Permission Denied
+            logger.critical('%s: [IOError] %s: %s', __basename__,
+                            error, error.filename
+                           )
+            EXIT_STATUS = os.EX_NOPERM
+        else:
+            logger.critical('%s: [IOError] %s', __basename__, error)
+            EXIT_STATUS = error.errno
+    except OSError as error:
+        #_, error, _ = sys.exc_info()
+        logger.debug('Caught OSError')
+        if error.errno == 2:                #: No such file/directory
+            logger.critical('%s: [OSError] %s: %s', __basename__,
+                            error, error.filename
+                           )
+            EXIT_STATUS = os.EX_UNAVAILABLE
+        else:
+            logger.critical('%s: [OSError] %s', __basename__, error)
+            EXIT_STATUS = error.errno
+    except Exception as error:                   #: pylint: disable=broad-except
+        #_, error, _ = sys.exc_info()
+        logger.debug('Caught Exception: %s', sys.exc_info())
+        logger.critical('%s: %s', __basename__, error)
+        EXIT_STATUS = 10
+    else:
+        logger.debug('main() exited cleanly.')
+        if EXIT_STATUS is None:
+            EXIT_STATUS = os.EX_OK
+    #-- NOTE: "try..except..finally" does not work pre 2.5
+    finally:
+        logger.debug('Mandatory clean-up.')
+        if EXIT_STATUS is None:
+            logger.debug('EXIT_STATUS is still None.')
+            EXIT_STATUS = 20
+        if options.debug:
+            print('\n------ end ------\n')
+        logging.shutdown()
+        sys.exit(EXIT_STATUS)
+    #-- NOTE: more exit codes here:
+    #--   https://docs.python.org/2/library/os.html#process-management
+##==---
+#==============================================================================
