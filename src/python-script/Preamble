@@ -16,7 +16,8 @@
 # pylint: disable=line-too-long
 #-- line-too-long is inevitable with the Jinga2 strings #}
 #===============================================================================
-#-- Preamble v2.0.0-01
+#-- Preamble v2.0.0
+#===============================================================================
 '''{#
     .. py:module:: python_script
     #}
@@ -51,7 +52,10 @@ from __future__ import with_statement   #: Clean up some uses of try/except PEP-
 #-- These may break 2.5 compatibility
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
-import ConfigParser #: 'Easy' configuration parsing
+try:
+    import ConfigParser #: 'Easy' configuration parsing
+except ImportError:
+    import configparser as ConfigParser#: At some point this was required...
 #-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
@@ -92,7 +96,6 @@ __author__ = ['{{ full_name|default("TODO: CHANGEME", true) }} <{{ email|default
 __created__ = '{{ date|default("TODO: CHANGEME", true) }}'               #: date script originlly created
 __copyright__ = '{{ software_copyright|default("TODO: CHANGEME", true) }}' #: Copyright short name
 __license__ = '{{ software_license|default("TODO: CHANGEME", true) }}'
-__gnu_version__ = False #: If True print GNU version string (which includes copyright/license)
 __cononical_name__ = '{{ script_name|default("TODO: CHANGEME", true) }}' #: static name, *NOT* os.path.basename(sys.argv[0])
 __project_name__ = '{{ project_name|default("TODO: CHANGEME", true) }}'  #: name of overall project, if needed
 __project_home__ = '{{ project_home|default("TODO: CHANGEME", true) }}'  #: where to find source/documentation
@@ -102,7 +105,7 @@ __docformat__ = 'reStructuredText en'       #: attempted style for documentation
 __basename__ = os.path.basename(sys.argv[0]) #: name script run as
 #------------------------------------------------------------------------------
 #-- Flags
-__logger_file_set__ = False #: If a file setup for logger
+__gnu_version__ = False #: If True print GNU version string (which includes copyright/license)
 __require_root__ = False    #: Does script require root
 #------------------------------------------------------------------------------
 #-- Load in environment variables, or set defaults
@@ -114,8 +117,9 @@ __logger_lvl__ = os.getenv('LOGGER_LVL') if 'LOGGER_LVL' in os.environ else 'inf
 
 EXIT_STATUS = None
 #------------------------------------------------------------------------------
-metavars = {
+METAVARS = {
     'name': __cononical_name__,
+    'basename': __basename__,
     'script': {
         'version': __version__,
         'revised': __revised__,
@@ -126,7 +130,6 @@ metavars = {
         'created': __created__,
         'copyright': __copyright__,
         'license': __license__,
-        'gnu_version': __gnu_version__,
         'cononical_name': __cononical_name__,
         'project_name': __project_name__,
         'project_home': __project_home__,
@@ -135,9 +138,9 @@ metavars = {
         'basename': __basename__
     },
     'flags': {
-        'logger_file_set': __logger_file_set__,
+        'gnu_version': __gnu_version__,
         'require_root': __require_root__
-    }
+    },
     'env': {
         'default_dsf': __default_dsf__,
         'logger_dsf': __logger_dsf__,
@@ -146,5 +149,7 @@ metavars = {
         'logger_lvl': __logger_lvl__
     }
 }
+
+
 ##==---
 #==============================================================================
