@@ -10,24 +10,30 @@
 # Created:    2019-12-10
 ''' My base class for dealing with REST APIs '''
 #===============================================================================
-__cononical_name__ = 'UtilityClass'
-#===============================================================================
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+import logging
+import sys
+#------------------------------------------------------------------------------
+__cononical_name__ = 'RestUtil'
+#------------------------------------------------------------------------------
 ##--==
 #===============================================================================
-#-- UtilityClass 2.0.0
+#-- RestUtil v2.0.0
 #==============================================================================
 from cookielib import LWPCookieJar
 from urllib import urlencode
 import base64
 import json
-import logging
-import sys
 try:
     import requests
 except ImportError:
     raise ImportError('The python-requests module is required.')
 #==============================================================================
-class UtilityClass(object): #: pylint: disable=useless-object-inheritance
+class RestUtil(object): #: pylint: disable=useless-object-inheritance
     ''' Class for interacting with Satellite 6 API '''
     __version = '2.0.0'
 
@@ -37,7 +43,7 @@ class UtilityClass(object): #: pylint: disable=useless-object-inheritance
                  token=None, client_id=None, cookiefile=None):
         self.logger = logging.getLogger(__cononical_name__)
         self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        self.logger.debug('Initiallizing UtilityClass version %s.', self.__version)
+        self.logger.debug('Initiallizing RestUtil version %s.', self.__version)
         self.logger.debug(locals())
         if token is not None:
             authorization = 'Bearer %s' % token['access_token']
