@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191211-103658
+# Revised:    20191211-140742
 # Created:    2019-12-10
 ''' Class for working with Satellite 6.x '''
 #==============================================================================
@@ -37,29 +37,28 @@ class Sat6Object(object): #: pylint: disable=useless-object-inheritance
     lookup_tables = {'lce': 'lut/lce_name.json'}
 
     def __init__(self, server=None, authkey=None,
-                 org_id=None, org_name=None, insecure=False):
+                 org_id=1, org_name=None, insecure=False):
         self.logger = logging.getLogger(__cononical_name__)
         self.logger.debug('Initiallizing Sat6Object version %s.', self.__version)
         if server is None:
             raise RuntimeError('Must provide Satellite server name.')
-        self.server = server
+        if authkey is None:
+            raise RuntimeError('Must provide authkey for access.')
+
         self.url = 'https://%s' % server
         self.pub = '%s/pub' % self.url
         self.foreman = '%s/api/v2' % self.url
         self.katello = '%s/katello/api/v2' % self.url
         # self.kcert = '/etc/rhsm/ca/katello-server-ca.pem'
         self.util = RestUtil(authkey=authkey, insecure=insecure,
-                                 cookiefile=os.getenv("HOME") + "/.sat6_api_session")
+                             cookiefile=os.getenv("HOME") + "/.sat6_api_session")
         self.results = {"success": None, "msg": None, "return": None}
         self.lutables = {}
-        self.verbose = False
         if org_name is not None:
             self.org_name = org_name
             self.org_id = self.get_org(self.org_name)['id']
-        elif org_id is not None:
-            self.org_id = org_id
         else:
-            self.org_id = 1
+            self.org_id = org_id
 
     def lookup_lce_name(self, lce_tag):
         ''' Searches for and returns LCE from Satellite 6.
