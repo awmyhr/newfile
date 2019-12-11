@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191210
+# Revised:    20191211-111802
 # Created:    2019-12-10
 ''' Class for holding/translating colors '''
 #===============================================================================
@@ -25,7 +25,7 @@ __cononical_name__ = 'Colors'
 #==============================================================================
 #-- Colors v0.2.0
 #==============================================================================
-class Colors(object):
+class Colors(object): #: pylint: disable=useless-object-inheritance
     ''' Simple class to ease access to ENV colors '''
     __version = '0.2.0'
 
