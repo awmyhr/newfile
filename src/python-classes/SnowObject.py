@@ -34,7 +34,6 @@ class SnowObject(object): #: pylint: disable=useless-object-inheritance
     def __init__(self, server=None, username=None, password=None, authkey=None,
                  client_id=None, insecure=False, basepath=None):
         self.logger = logging.getLogger(__cononical_name__)
-        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         self.logger.debug('Initiallizing SnowObject version %s.', self.__version)
         if authkey is None:
             if username is None or password is None:

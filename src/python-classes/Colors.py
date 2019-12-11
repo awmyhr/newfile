@@ -1,8 +1,29 @@
 #!/usr/bin/python2 -tt
 # -*- coding: utf-8 -*-
+# Author:     awmyhr <awmyhr@gmail.com>
+# Contact:    awmyhr <awmyhr@gmail.com>
+# Project:    newfile
+# Proj Home:  https://github.com/awmyhr/newfile
+# Copyright:  2019 awmyhr
+# License:    Apache-2.0
+# Revised:    20191210
+# Created:    2019-12-10
 ''' Class for holding/translating colors '''
-#==============================================================================
+#===============================================================================
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+import logging
 import os
+import sys
+#------------------------------------------------------------------------------
+__cononical_name__ = 'Colors'
+#------------------------------------------------------------------------------
+##--==
+#==============================================================================
+#-- Colors v0.2.0
 #==============================================================================
 class Colors(object):
     ''' Simple class to ease access to ENV colors '''
@@ -17,6 +38,8 @@ class Colors(object):
     _colors = {}
 
     def __init__(self):
+        self.logger = logging.getLogger(__cononical_name__)
+        self.logger.debug('Initiallizing Colors version %s.', self.__version)
         for color in self._colorlist:
             self._colors[color] = os.getenv(color) if color in os.environ else ''
 
@@ -143,3 +166,6 @@ class Colors(object):
             return self._colors['c_revr']
         return ''
 
+
+##==---
+#==============================================================================

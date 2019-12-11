@@ -42,7 +42,6 @@ class RestUtil(object): #: pylint: disable=useless-object-inheritance
     def __init__(self, authkey=None, insecure=False,
                  token=None, client_id=None, cookiefile=None):
         self.logger = logging.getLogger(__cononical_name__)
-        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         self.logger.debug('Initiallizing RestUtil version %s.', self.__version)
         self.logger.debug(locals())
         if token is not None:

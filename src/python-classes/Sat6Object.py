@@ -39,7 +39,6 @@ class Sat6Object(object): #: pylint: disable=useless-object-inheritance
     def __init__(self, server=None, authkey=None,
                  org_id=None, org_name=None, insecure=False):
         self.logger = logging.getLogger(__cononical_name__)
-        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         self.logger.debug('Initiallizing Sat6Object version %s.', self.__version)
         if server is None:
             raise RuntimeError('Must provide Satellite server name.')

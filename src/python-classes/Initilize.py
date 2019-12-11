@@ -166,6 +166,7 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
         self._init_logger(mvars['env'])
         if self.debug or self._logger_file_set:
             self._debug_info(mvars['script'])
+        self.logger.debug('Initialized Initilize version %s.', self.__version)
 
     def _load_configs(self, name):
         parser = ConfigParser.SafeConfigParser(defaults=self._defaults)
