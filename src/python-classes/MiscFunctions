@@ -6,9 +6,9 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191211-091412
+# Revised:    20191211-101303
 # Created:    2019-12-10
-''' My base class for dealing with options and configurations '''
+''' My misc, generally useful Python functions '''
 #===============================================================================
 from __future__ import absolute_import  #: Require parens to group imports PEP-0328
 from __future__ import division         #: Enable 3.x True Division PEP-0238
@@ -23,30 +23,6 @@ __cononical_name__ = 'MiscFunctions'
 ##--==
 #==============================================================================
 #-- MiscFunctions v2.0.0
-#==============================================================================
-def timestamp(time_format=None):
-    ''' Return date in specified format
-
-    Args:
-        time_format (str): Format string for timestamp. Compatible w/'date'.
-
-    Returns:
-        The formatted timestamp as a string.
-
-    '''
-    logger = logging.getLogger(__cononical_name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger.debug('Passed format: %s', time_format)
-
-    import time
-    if time_format is None:
-        try:
-            time_format = __default_dsf__
-        except NameError:
-            time_format = "%Y%m%d-%H%M%S"
-    return time.strftime(time_format.strip('+'))
-
-
 #==============================================================================
 def get_temp(directory=None, stem=None):
     ''' Creates a temporary file (or directory), returning the path.
@@ -75,6 +51,39 @@ def get_temp(directory=None, stem=None):
         return tempfile.mkdtemp(prefix='%s-d.' % stem)
     return tempfile.mkstemp(prefix='%s.' % stem)
 
+#==============================================================================
+def get_timestamp(time_format=None):
+    ''' Return date in specified format
+
+    Args:
+        time_format (str): Format string for timestamp. Compatible w/'date'.
+
+    Returns:
+        The formatted timestamp as a string.
+
+    '''
+    logger = logging.getLogger(__cononical_name__)
+    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+    logger.debug('Passed format: %s', time_format)
+
+    import time
+    if time_format is None:
+        try:
+            time_format = __default_dsf__
+        except NameError:
+            time_format = "%Y%m%d-%H%M%S"
+    return time.strftime(time_format.strip('+'))
+
+#==============================================================================
+def is_valid_ipv4(ipaddr):
+    '''Checks if passed paramater is a valid IPv4 address'''
+    parts = ipaddr.split('.')
+    if len(parts) != 4:
+        return False
+    try:
+        return all(0 <= int(p) < 256 for p in parts)
+    except ValueError:
+        return False
 
 #==============================================================================
 def set_value(filename, key, value):
