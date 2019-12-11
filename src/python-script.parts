@@ -4,10 +4,10 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191210
+# Revised:    20191211-091028
 # Created:    2019-12-10
 #==============================================================================
 python-script/Preamble
-python-classes/Initilize.py
-python-classes/UtilityClass.py
+python-classes/Initilize
+python-classes/MiscFunctions
 python-script/Postscript
