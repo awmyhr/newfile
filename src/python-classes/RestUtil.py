@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191211-140742
+# Revised:    20191211-153250
 # Created:    2019-12-10
 ''' My base class for dealing with REST APIs '''
 #===============================================================================
@@ -53,6 +53,8 @@ class RestUtil(object): #: pylint: disable=useless-object-inheritance
         if client_id is not None:
             self.token = self._get_token(tokenfile=self.token_file, tokenurl=tokenurl)
             self.connection = self._new_connection(authkey=authkey, client_id=client_id, token=self.token, insecure=insecure)
+        else:
+            self.token = None
         if self.cookie_file is not None:
             self.connection.cookies = LWPCookieJar(self.cookie_file)
             try:
@@ -123,10 +125,10 @@ class RestUtil(object): #: pylint: disable=useless-object-inheritance
                 self.logger.debug('Token file invalid or expired, getting new token.')
                 self.logger.debug('Time: %s ; Token Exp: %s', int(time.time()), int(token['expires']))
                 self.logger.debug('Token: %s', token)
-                token = self.rest_call('get', tokenurl)
+                token = self.rest_call('get', tokenurl)['return']
         except (IOError, AttributeError, TypeError, ValueError):
             self.logger.debug('Error with token file, requesting new token.')
-            token = self.rest_call('get', tokenurl)
+            token = self.rest_call('get', tokenurl)['return']
         if 'access_token' not in token:
             raise RuntimeError('Error: No access token. Only found: %s' % token)
         return token
