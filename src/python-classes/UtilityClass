@@ -1,39 +1,44 @@
 #!/usr/bin/python2 -tt
 # -*- coding: utf-8 -*-
+# Author:     awmyhr <awmyhr@gmail.com>
+# Contact:    awmyhr <awmyhr@gmail.com>
+# Project:    newfile
+# Proj Home:  https://github.com/awmyhr/newfile
+# Copyright:  2019 awmyhr
+# License:    Apache-2.0
+# Revised:    20191211-101303
+# Created:    2019-12-10
+''' My base class for dealing with REST APIs '''
+#===============================================================================
+__cononical_name__ = 'UtilityClass'
+#===============================================================================
+##--==
+#===============================================================================
+#-- UtilityClass 2.0.0
 #==============================================================================
-import sys          #: System-specific parameters & functions
-try:
-    import base64
-except ImportError:
-    raise ImportError('The python-base64 module is required.')
+from cookielib import LWPCookieJar
+from urllib import urlencode
+import base64
+import json
+import logging
+import sys
 try:
     import requests
 except ImportError:
     raise ImportError('The python-requests module is required.')
-try:
-    import json
-except ImportError:
-    raise ImportError('The python-json module is required.')
-try:
-    from urllib import urlencode
-except ImportError:
-    raise ImportError('The python-urllib module is required.')
-try:
-    from cookielib import LWPCookieJar
-except ImportError:
-    raise ImportError('The python-cookielib module is required.')
 #==============================================================================
-class UtilityClass(object):
+class UtilityClass(object): #: pylint: disable=useless-object-inheritance
     ''' Class for interacting with Satellite 6 API '''
-    __version = '1.5.0'
+    __version = '2.0.0'
 
     per_page = 100
 
-    def __init__(self, server=None, authkey=None, insecure=False,
+    def __init__(self, authkey=None, insecure=False,
                  token=None, client_id=None, cookiefile=None):
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        logger.debug('Initiallizing UtilityClass version %s.', self.__version)
-        logger.debug(locals())
+        self.logger = logging.getLogger(__cononical_name__)
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Initiallizing UtilityClass version %s.', self.__version)
+        self.logger.debug(locals())
         if token is not None:
             authorization = 'Bearer %s' % token['access_token']
         else:
@@ -48,7 +53,7 @@ class UtilityClass(object):
             'accept': 'application/json',
             'cache-control': 'no-cache'
         }
-        logger.debug('Headers set: %s', self.connection.headers)
+        self.logger.debug('Headers set: %s', self.connection.headers)
         self.connection.verify = not bool(insecure)
         self.cookiefile = cookiefile
         if cookiefile is not None:
@@ -113,58 +118,58 @@ class UtilityClass(object):
             Results of API call in a dict
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         results = {"success": None, "msg": None, "return": None}
 
-        logger.debug('Calling URL: %s', url)
-        logger.debug('Using method: %s', method)
-        logger.debug('With Headers: %s', self.connection.headers)
+        self.logger.debug('Calling URL: %s', url)
+        self.logger.debug('Using method: %s', method)
+        self.logger.debug('With Headers: %s', self.connection.headers)
         if params is not None:
-            logger.debug('With params: %s', params)
+            self.logger.debug('With params: %s', params)
         if jsonin is not None:
-            logger.debug('With json: %s', jsonin)
+            self.logger.debug('With json: %s', jsonin)
         if data is not None:
-            logger.debug('With data: %s', data)
+            self.logger.debug('With data: %s', data)
             data = json.dumps(data)
 
         try:
             req_results = self.connection.request(method, url, params=params, data=data, json=jsonin)
-            logger.debug('Final URL: %s', req_results.url)
-            logger.debug('Return Headers: %s', req_results.headers)
-            logger.debug('Status Code: %s', req_results.status_code)
-            logger.debug('Results: %s', req_results.content)
+            self.logger.debug('Final URL: %s', req_results.url)
+            self.logger.debug('Return Headers: %s', req_results.headers)
+            self.logger.debug('Status Code: %s', req_results.status_code)
+            self.logger.debug('Results: %s', req_results.content)
             rjson = req_results.json()
             if not req_results.ok:
                 if self.verbose:
-                    logger.debug('Results: %s', rjson)
+                    self.logger.debug('Results: %s', rjson)
                 if 'error' in rjson:
-                    logger.debug('Requests API call returned error.')
+                    self.logger.debug('Requests API call returned error.')
                     if 'full_messages' in rjson['error']:
-                        logger.error('\n'.join(rjson['error']['full_messages']))
+                        self.logger.error('\n'.join(rjson['error']['full_messages']))
                     else:
-                        logger.error('Sorry, no further info, try --debug.')
+                        self.logger.error('Sorry, no further info, try --debug.')
                 elif 'displayMessage' in rjson:
-                    logger.debug(rjson['displayMessage'])
-                    logger.error('Sorry, no useful info, try --debug.')
+                    self.logger.debug(rjson['displayMessage'])
+                    self.logger.error('Sorry, no useful info, try --debug.')
                 else:
-                    logger.error('Sorry, no error info, try --debug.')
+                    self.logger.error('Sorry, no error info, try --debug.')
             req_results.raise_for_status()
             results['success'] = True
             results['return'] = rjson
         except requests.exceptions.HTTPError as error:
-            logger.debug('Caught Requests HTTP Error.')
+            self.logger.debug('Caught Requests HTTP Error.')
             results['msg'] = '[HTTPError]: %s' % (error.message) #: pylint: disable=no-member
         except requests.exceptions.ConnectionError as error:
-            logger.debug('Caught Requests Connection Error.')
+            self.logger.debug('Caught Requests Connection Error.')
             results['msg'] = '[ConnectionError]: %s' % (error.message) #: pylint: disable=no-member
         except requests.exceptions.Timeout as error:
-            logger.debug('Caught Requests Timeout.')
+            self.logger.debug('Caught Requests Timeout.')
             results['msg'] = '[Timeout]: %s' % (error.message) #: pylint: disable=no-member
         except requests.exceptions.RequestException as error:
-            logger.debug('Caught Requests Exception.')
+            self.logger.debug('Caught Requests Exception.')
             results['msg'] = '[Requests]: REST call failed: %s' % (error.message) #: pylint: disable=no-member
 
-        logger.debug('rest_call: %s', results['msg'])
+        self.logger.debug('rest_call: %s', results['msg'])
         return results
 
     def find_item(self, url, search=None, field='name'):
@@ -176,7 +181,7 @@ class UtilityClass(object):
         Returns:
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         results = {"success": False, "msg": None, "return": None}
 
         if url is None:
@@ -185,8 +190,8 @@ class UtilityClass(object):
             search_str = '%s~"%s"' % (field, search)
 
             results = self.rest_call('get', url,
-                                      urlencode([('search', '' + str(search_str))]))
-            if results['return']['subtotal'] == 0:
+                                     urlencode([('search', '' + str(search_str))]))
+            if self.logger['return']['subtotal'] == 0:
                 results['success'] = False
                 results['msg'] = 'Warning: No matches for %s.' % search
             elif results['return']['subtotal'] > 1:
@@ -197,7 +202,7 @@ class UtilityClass(object):
                 results['msg'] = 'Success: %s found.' % search
                 results['return'] = results['return']['results'][0]
 
-        logger.debug('find_item: %s', results['msg'])
+        self.logger.debug('find_item: %s', results['msg'])
         return results
 
     def get_item(self, url, label):
@@ -209,7 +214,7 @@ class UtilityClass(object):
         Returns:
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         results = {"success": False, "msg": None, "return": None}
 
         if url is None:
@@ -227,7 +232,7 @@ class UtilityClass(object):
                 results['success'] = True
                 results['msg'] = 'Success: %s found.' % label
 
-        logger.debug('get_item: %s', results['msg'])
+        self.logger.debug('get_item: %s', results['msg'])
         return results
 
     def get_list(self, url, search=None, field='name', per_page=None, params=None):
@@ -237,7 +242,7 @@ class UtilityClass(object):
             List of Hosts (dict). Of particular value will be
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         if per_page is None:
             per_page = self.per_page
         if params is None:
@@ -263,3 +268,6 @@ class UtilityClass(object):
             item += 1
             page_item += 1
 
+
+##==---
+#==============================================================================
