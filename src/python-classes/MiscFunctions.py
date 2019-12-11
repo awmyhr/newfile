@@ -15,11 +15,12 @@ from __future__ import division         #: Enable 3.x True Division PEP-0238
 from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
-import logging      #: Python's standard logging facilities
+import logging
 import os
 import sys
 #------------------------------------------------------------------------------
 __cononical_name__ = 'MiscFunctions'
+#------------------------------------------------------------------------------
 ##--==
 #==============================================================================
 #-- MiscFunctions v2.0.0

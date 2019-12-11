@@ -1,22 +1,45 @@
 #!/usr/bin/python2 -tt
 # -*- coding: utf-8 -*-
+# Author:     awmyhr <awmyhr@gmail.com>
+# Contact:    awmyhr <awmyhr@gmail.com>
+# Project:    newfile
+# Proj Home:  https://github.com/awmyhr/newfile
+# Copyright:  2019 awmyhr
+# License:    Apache-2.0
+# Revised:    20191211-103658
+# Created:    2019-12-10
 ''' Class for working with ServiceNow '''
 #==============================================================================
-import os           #: Misc. OS interfaces
-import sys          #: System-specific parameters & functions
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+import logging
+import os
+import sys
+#------------------------------------------------------------------------------
+__cononical_name__ = 'SnowObject'
+#------------------------------------------------------------------------------
+##--==
+#===============================================================================
+#-- SnowObject v2.0.0
 #==============================================================================
-class SnowObject(object):
+import RestUtil
+#==============================================================================
+class SnowObject(object): #: pylint: disable=useless-object-inheritance
     ''' Class for interacting with ServiceNow API '''
-    __version = '1.4.0'
+    __version = '2.0.0'
 
     def __init__(self, server=None, username=None, password=None, authkey=None,
                  client_id=None, insecure=False, basepath=None):
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        logger.debug('Initiallizing SnowObject version %s.', self.__version)
+        self.logger = logging.getLogger(__cononical_name__)
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Initiallizing SnowObject version %s.', self.__version)
         if authkey is None:
             if username is None or password is None:
                 raise RuntimeError('Must provide either authkey or username/password pair.')
-            logger.debug('Creating authkey for user: %s', username)
+            self.logger.debug('Creating authkey for user: %s', username)
             self.username = username
             self.authkey = base64.b64encode('%s:%s' % (username, password)).strip()
         else:
@@ -34,7 +57,7 @@ class SnowObject(object):
         self.token_file = '%s/.%s-%s' % (tempfile.gettempdir(),
                                          os.getenv('USER'),
                                          self.client_id.split("-")[0])
-        self.util = UtilityClass(authkey=authkey, insecure=insecure,
+        self.util = RestUtil(authkey=authkey, insecure=insecure,
                                  cookiefile=os.getenv("HOME") + "/.sat6_api_session")
         self.connection = self._new_connection(client_id=self.client_id)
         self.token = self._get_token()
@@ -43,8 +66,8 @@ class SnowObject(object):
         self.results = {"success": None, "msg": None, "return": None, "entries": 0, "list": None}
 
     def __del__(self):
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        logger.debug('Saving token file: %s.', self.token_file)
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Saving token file: %s.', self.token_file)
         with open(self.token_file, 'w') as file_:
             json.dump(self.token, file_)
 
@@ -55,18 +78,18 @@ class SnowObject(object):
             Token as a dict
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         try:
-            logger.debug('Attempting to load token file: %s.', self.token_file)
+            self.logger.debug('Attempting to load token file: %s.', self.token_file)
             with open(self.token_file, 'r') as file_:
                 token = json.load(file_)
             if 'expires' not in token or int(time.time()) > int(token['expires']):
-                logger.debug('Token file invalid or expired, getting new token.')
-                logger.debug('Time: %s ; Token Exp: %s', int(time.time()), int(token['expires']))
-                logger.debug('Token: %s', token)
+                self.logger.debug('Token file invalid or expired, getting new token.')
+                self.logger.debug('Time: %s ; Token Exp: %s', int(time.time()), int(token['expires']))
+                self.logger.debug('Token: %s', token)
                 token = self._get_rest_call(self.token_url)
         except (IOError, AttributeError, TypeError, ValueError):
-            logger.debug('Error with token file, requesting new token.')
+            self.logger.debug('Error with token file, requesting new token.')
             token = self._get_rest_call(self.token_url)
         if 'access_token' not in token:
             raise RuntimeError('Error: No access token. Only found: %s' % token)
@@ -84,44 +107,44 @@ class SnowObject(object):
             Results of API call in a dict
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
 
-        logger.debug('Calling URL: %s', url)
-        logger.debug('With Headers: %s', self.connection.headers)
+        self.logger.debug('Calling URL: %s', url)
+        self.logger.debug('With Headers: %s', self.connection.headers)
         if params is not None:
-            logger.debug('With params: %s', params)
+            self.logger.debug('With params: %s', params)
         if data is not None:
-            logger.debug('With data: %s', data)
+            self.logger.debug('With data: %s', data)
             data = json.dumps(data)
 
         try:
             results = self.connection.get(url, params=params, data=data)
-            logger.debug('Final URL: %s', results.url)
-            logger.debug('Return Headers: %s', results.headers)
-            logger.debug('%s: %s', results.status_code, results.raw)
+            self.logger.debug('Final URL: %s', results.url)
+            self.logger.debug('Return Headers: %s', results.headers)
+            self.logger.debug('%s: %s', results.status_code, results.raw)
         except requests.ConnectionError as error:
-            logger.debug('Caught Requests Connection Error.')
+            self.logger.debug('Caught Requests Connection Error.')
             error.message = '[ConnectionError]: %s' % (error.message) #: pylint: disable=no-member
             raise error
         except requests.HTTPError as error:
-            logger.debug('Caught Requests HTTP Error.')
+            self.logger.debug('Caught Requests HTTP Error.')
             error.message = '[HTTPError]: %s' % (error.message) #: pylint: disable=no-member
             raise error
         except requests.Timeout as error:
-            logger.debug('Caught Requests Timeout.')
+            self.logger.debug('Caught Requests Timeout.')
             error.message = '[Timeout]: %s' % (error.message) #: pylint: disable=no-member
             raise error
         except Exception as error:
-            logger.debug('Caught Requests Exception.')
+            self.logger.debug('Caught Requests Exception.')
             error.message = '[Requests]: REST call failed: %s' % (error.message) #: pylint: disable=no-member
             raise error
         results.raise_for_status()
 
         rjson = results.json()
-        logger.debug('Results: %s', rjson)
+        self.logger.debug('Results: %s', rjson)
 
         if rjson.get('error'):
-            logger.debug('Requests API call returned error.')
+            self.logger.debug('Requests API call returned error.')
             raise IOError(127, '[Requests]: API call failed: %s' % (rjson['error']['message']))
         return rjson
 
@@ -138,7 +161,7 @@ class SnowObject(object):
             Requests session object.
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         connection = requests.Session()
         connection.headers = {
             'content-type': 'application/json',
@@ -153,7 +176,7 @@ class SnowObject(object):
             connection.headers['authorization'] = 'Bearer %s' % token['access_token']
         if client_id is not None:
             connection.headers['x-ibm-client-id'] = client_id
-        logger.debug('Headers set: %s', connection.headers)
+        self.logger.debug('Headers set: %s', connection.headers)
         if insecure is None:
             connection.verify = not bool(self.insecure)
         else:
@@ -163,7 +186,7 @@ class SnowObject(object):
 
     def is_valid_ipv4(self, ipaddr):
         '''Checks if passed paramater is a valid IPv4 address'''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
         parts = ipaddr.split('.')
         if len(parts) != 4:
             return False
@@ -186,15 +209,15 @@ class SnowObject(object):
             return['lifecycleStatus']
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        logger.debug('Looking for host: %s', hostname)
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Looking for host: %s', hostname)
         self.results = {"success": None, "msg": None, "return": None, "entries": 0, "list": None}
 
         if hostname is None:
             self.results['success'] = False
             self.results['msg'] = 'Hostname passed was type None.'
             self.results['return'] = None
-            logger.debug('Error: %s', self.results['msg'])
+            self.logger.debug('Error: %s', self.results['msg'])
         else:
             if self.is_valid_ipv4(hostname):
                 field = 'ipAddress'
@@ -207,7 +230,7 @@ class SnowObject(object):
                 self.results['msg'] = 'No host matches for %s.' % hostname
                 self.results['entries'] = 0
                 self.results['return'] = None
-                logger.debug('Error: %s', self.results['msg'])
+                self.logger.debug('Error: %s', self.results['msg'])
             else:
                 if rels:
                     count = 0
@@ -224,14 +247,14 @@ class SnowObject(object):
                     self.results['entries'] = req_results['total']
                     self.results['list'] = req_results['items']
                     self.results['return'] = None
-                    logger.debug('Error: %s', self.results['msg'])
+                    self.logger.debug('Error: %s', self.results['msg'])
                 else:
                     self.results['success'] = True
                     self.results['msg'] = 'Found %s.' % hostname
                     self.results['entries'] = 1
                     self.results['list'] = req_results['items']
                     self.results['return'] = req_results['items'][0]
-                    logger.debug('Success: %s', self.results['msg'])
+                    self.logger.debug('Success: %s', self.results['msg'])
         return self.results['return']
 
 
@@ -249,15 +272,15 @@ class SnowObject(object):
             return['lifecycleStatus']
 
         '''
-        logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-        logger.debug('Looking for host: %s', hostid)
+        self.logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
+        self.logger.debug('Looking for host: %s', hostid)
         self.results = {"success": None, "msg": None, "return": None, "entries": 0, "list": None}
 
         if hostid is None:
             self.results['success'] = False
             self.results['msg'] = 'Host ID passed was type None.'
             self.results['return'] = None
-            logger.debug('Error: %s', self.results['msg'])
+            self.logger.debug('Error: %s', self.results['msg'])
         else:
             req_results = self._get_rest_call('%s/%s/relationships' % (self.compinsts, hostid))
             self.results['return'] = req_results['items']
@@ -269,3 +292,5 @@ class SnowObject(object):
         return self.results['return']
 
 
+##==---
+#==============================================================================

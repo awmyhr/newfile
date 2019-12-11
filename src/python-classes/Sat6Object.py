@@ -10,17 +10,23 @@
 # Created:    2019-12-10
 ''' Class for working with Satellite 6.x '''
 #==============================================================================
+from __future__ import absolute_import  #: Require parens to group imports PEP-0328
+from __future__ import division         #: Enable 3.x True Division PEP-0238
+from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
+from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
+from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
 import logging
 import os
 import sys
-import UtilityClass
 #------------------------------------------------------------------------------
 __cononical_name__ = 'Sat6Object'
-#===============================================================================
+#------------------------------------------------------------------------------
 ##--==
 #===============================================================================
-#-- Sat6Object 3.0.0
+#-- Sat6Object v3.0.0
 #==============================================================================
+import RestUtil
+#===============================================================================
 class Sat6Object(object): #: pylint: disable=useless-object-inheritance
     ''' Class for interacting with Satellite 6 API '''
     __version = '3.0.0'
@@ -43,7 +49,7 @@ class Sat6Object(object): #: pylint: disable=useless-object-inheritance
         self.foreman = '%s/api/v2' % self.url
         self.katello = '%s/katello/api/v2' % self.url
         # self.kcert = '/etc/rhsm/ca/katello-server-ca.pem'
-        self.util = UtilityClass(authkey=authkey, insecure=insecure,
+        self.util = RestUtil(authkey=authkey, insecure=insecure,
                                  cookiefile=os.getenv("HOME") + "/.sat6_api_session")
         self.results = {"success": None, "msg": None, "return": None}
         self.lutables = {}
@@ -819,6 +825,7 @@ class Sat6Object(object): #: pylint: disable=useless-object-inheritance
         self.results['return'] = host
         self.logger.debug('remove_host_hc: %s', self.results['msg'])
         return True
+
 
 ##==---
 #==============================================================================

@@ -15,7 +15,16 @@ from __future__ import division         #: Enable 3.x True Division PEP-0238
 from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
-import logging      #: Python's standard logging facilities
+import logging
+import os
+import sys
+#------------------------------------------------------------------------------
+__cononical_name__ = 'Initilize'
+#------------------------------------------------------------------------------
+##--==
+#==============================================================================
+#-- Initilize v2.0.0
+#==============================================================================
 try:
     import ConfigParser #: 'Easy' configuration parsing
 except ImportError:
@@ -24,9 +33,6 @@ except ImportError:
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
 import optparse #: pylint: disable=deprecated-module
-import os
-import sys
-##--==
 #==============================================================================
 class _ModOptionParser(optparse.OptionParser):
     ''' By default format_epilog() strips newlines, we don't want that,
