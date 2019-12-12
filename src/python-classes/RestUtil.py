@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191211-153250
+# Revised:    20191212-093309
 # Created:    2019-12-10
 ''' My base class for dealing with REST APIs '''
 #===============================================================================
@@ -35,7 +35,7 @@ except ImportError:
     raise ImportError('The python-requests module is required.')
 #==============================================================================
 class RestUtil(object): #: pylint: disable=useless-object-inheritance
-    ''' Class for interacting with Satellite 6 API '''
+    ''' Class for interacting with RESTful APIs '''
     __version = '2.0.0'
 
     per_page = 100
