@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191213-114233
+# Revised:    20191213-150457
 # Created:    2019-12-13
 ''' Hold user login and related data '''
 #==============================================================================
@@ -20,21 +20,21 @@ __cononical_name__ = 'UserObject'
 #------------------------------------------------------------------------------
 ##--==
 #===============================================================================
-#-- UserObject v0.1.0
+#-- UserObject v0.2.0
 #==============================================================================
 class UserObject(object): #: pylint: disable=useless-object-inheritance
     ''' Hold user login and related data '''
-    __version = '0.1.0'
+    __version = '0.2.0'
 
     _authkey = None
-    _clientid = None
-    _cookiefile = None
+    _client_id = None
+    _cookie_file = None
     _password = None
-    _tokenfile = None
+    _token_file = None
     _username = None
 
-    def __init__(self, username=None, password=None, authkey=None, clientid=None,
-                 cookiefile=None, tokenfile=None):
+    def __init__(self, username=None, password=None, authkey=None, client_id=None,
+                 cookie_file=None, token_file=None):
         import logging
         self.logger = logging.getLogger(__cononical_name__)
         self.logger.debug('Initiallizing UserObject version %s.', self.__version)
@@ -46,9 +46,9 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
                 password = getpass.getpass('Password: ')
         self.username = username
         self.password = password
-        self.clientid = clientid
-        self.tokenfile = tokenfile
-        self.cookiefile = cookiefile
+        self.client_id = client_id
+        self.token_file = token_file
+        self.cookie_file = cookie_file
         if authkey is not None:
             self.authkey = authkey
 
@@ -65,50 +65,50 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
             params.append('password="%s"' % self.password)
         if self._authkey is not None:
             params.append('authkey="%s"' % self.authkey)
-        if self._clientid is not None:
-            params.append('clientid="%s"' % self.clientid)
-        if self._cookiefile is not None:
-            params.append('cookiefile="%s"' % self.cookiefile)
-        if self._tokenfile is not None:
-            params.append('tokenfile="%s"' % self.tokenfile)
-        return 'User(%s)' % ', '.join(params)
+        if self._client_id is not None:
+            params.append('client_id="%s"' % self.client_id)
+        if self._cookie_file is not None:
+            params.append('cookie_file="%s"' % self.cookie_file)
+        if self._token_file is not None:
+            params.append('token_file="%s"' % self.token_file)
+        return 'UserObject(%s)' % ', '.join(params)
 
     @property
-    def clientid(self):
+    def client_id(self):
         ''' instance property '''
-        return self._clientid
+        return self._client_id
 
-    @clientid.setter
-    def clientid(self, value):
+    @client_id.setter
+    def client_id(self, value):
         ''' property setter '''
-        self._clientid = value
+        self._client_id = value
 
     @property
-    def cookiefile(self):
+    def cookie_file(self):
         ''' instance property '''
-        if self._cookiefile is None:
+        if self._cookie_file is None:
             import os
             return '%s/.%s-%s' % (os.getenv("HOME"), os.getenv('USER'), 'cookie')
-        return self._cookiefile
+        return self._cookie_file
 
-    @cookiefile.setter
-    def cookiefile(self, value):
+    @cookie_file.setter
+    def cookie_file(self, value):
         ''' property setter '''
-        self._cookiefile = value
+        self._cookie_file = value
 
     @property
-    def tokenfile(self):
+    def token_file(self):
         ''' instance property '''
-        if self._tokenfile is None:
+        if self._token_file is None:
             import os
             import tempfile
             return '%s/.%s-%s' % (tempfile.gettempdir(), os.getenv('USER'), 'token')
-        return self._tokenfile
+        return self._token_file
 
-    @tokenfile.setter
-    def tokenfile(self, value):
+    @token_file.setter
+    def token_file(self, value):
         ''' property setter '''
-        self._tokenfile = value
+        self._token_file = value
 
     @property
     def username(self):
@@ -156,6 +156,7 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
             import base64
             self._authkey = base64.b64encode('%s:%s' % (self.username, self.password)).strip()
 
+
 ##==---
 #==============================================================================
 if __name__ == '__main__':
@@ -165,17 +166,18 @@ if __name__ == '__main__':
 
     test1 = UserObject('test1', '1test')
     print('test 1a:    %s / %s / %s / %s' % (test1.username, test1.password,
-                                             test1.authkey, test1.clientid))
+                                             test1.authkey, test1.client_id))
     test1.username = 'TEST1'
     test1.password = '1TEST'
     print('test 1b:    %s / %s / %s / %s' % (test1.username, test1.password,
-                                             test1.authkey, test1.clientid))
-    print('cookiefile: %s' % (test1.cookiefile))
-    print('tokenfile:  %s' % (test1.tokenfile))
-    test1.cookiefile = '/path/to/cookie/file'
-    test1.tokenfile = '/path/to/token/file'
-    print('cookiefile: %s' % (test1.cookiefile))
-    print('tokenfile:  %s' % (test1.tokenfile))
+                                             test1.authkey, test1.client_id))
+    print('cookie_file: %s' % (test1.cookie_file))
+    print('token_file:  %s' % (test1.token_file))
+    test1.cookie_file = '/path/to/cookie/file'
+    test1.token_file = '/path/to/token/file'
+    print('cookie_file: %s' % (test1.cookie_file))
+    print('token_file:  %s' % (test1.token_file))
+    print('-----------------------------')
     pprint(vars(test1))
     print(test1)
     print(repr(test1))
@@ -184,11 +186,12 @@ if __name__ == '__main__':
 
     test2 = UserObject('test2', '2test', 'dGVzdDI6MnRlc3Q=')
     print('test 2a:    %s / %s / %s / %s' % (test2.username, test2.password,
-                                             test2.authkey, test2.clientid))
+                                             test2.authkey, test2.client_id))
     test2.username = 'TEST2'
     test2.password = '2TEST'
     print('test 2b:    %s / %s / %s / %s' % (test2.username, test2.password,
-                                             test2.authkey, test2.clientid))
+                                             test2.authkey, test2.client_id))
+    print('-----------------------------')
     pprint(vars(test2))
     print(test2)
     print(repr(test2))
