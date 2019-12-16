@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191213-150457
+# Revised:    20191216-125642
 # Created:    2019-12-13
 ''' Hold user login and related data '''
 #==============================================================================
@@ -30,41 +30,40 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
             password    (str): Password string for login.
             authkey     (str): Base64 string for login.
             client_id   (str): String required by some forms of login.
-            cookie_file (str): Path to file for holding cookie data.
-            token_file  (str): Path to file for holding token data.
+            paths      (dict): Holds filesystem paths for user data.
+                paths['cache']  (str): User cache path.
+                paths['config'] (str): User configuration path.
+                paths['temp']   (str): User temp path.
 
         If authkey is not passed, then username/password are reqrired.
         If either of those are not passed, they will be asked for.
 
         Returns:
             An UserObject.'''
-    __version = '0.2.0'
+    __version = '0.3.0'
 
-    _authkey = None
-    _client_id = None
-    _cookie_file = None
-    _password = None
-    _token_file = None
-    _username = None
+    _defaults = {
+        'paths': {'cache': None, 'config': None, 'temp': None}
+    }
 
     def __init__(self, username=None, password=None, authkey=None, client_id=None,
-                 cookie_file=None, token_file=None):
+                 paths=None):
         import logging
-        self.logger = logging.getLogger(__cononical_name__)
-        self.logger.debug('Initiallizing UserObject version %s.', self.__version)
+        self._logger = logging.getLogger(__cononical_name__)
+        self._logger.debug('Initiallizing UserObject version %s.', self.__version)
         if authkey is None:
             if username is None:
                 username = raw_input('Username: ')
             if password is None:
                 import getpass
                 password = getpass.getpass('Password: ')
-        self.username = username
-        self.password = password
-        self.client_id = client_id
-        self.token_file = token_file
-        self.cookie_file = cookie_file
-        if authkey is not None:
-            self.authkey = authkey
+        self._username = username
+        self._password = password
+        self._authkey = authkey
+        self._client_id = client_id
+        #-- Initilize the paths dict before setting from args
+        self._paths = self._defaults['paths']
+        self.paths = paths
 
     def __str__(self):
         if self.username is not None:
@@ -81,10 +80,8 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
             params.append('authkey="%s"' % self.authkey)
         if self._client_id is not None:
             params.append('client_id="%s"' % self.client_id)
-        if self._cookie_file is not None:
-            params.append('cookie_file="%s"' % self.cookie_file)
-        if self._token_file is not None:
-            params.append('token_file="%s"' % self.token_file)
+        if self._paths is not None:
+            params.append('paths="%s"' % self.paths)
         return 'UserObject(%s)' % ', '.join(params)
 
     @property
@@ -98,31 +95,22 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
         self._client_id = value
 
     @property
-    def cookie_file(self):
+    def paths(self):
         ''' instance property '''
-        if self._cookie_file is None:
-            import os
-            return '%s/.%s-%s' % (os.getenv("HOME"), os.getenv('USER'), 'cookie')
-        return self._cookie_file
+        return self._paths
 
-    @cookie_file.setter
-    def cookie_file(self, value):
+    @paths.setter
+    def paths(self, value):
         ''' property setter '''
-        self._cookie_file = value
-
-    @property
-    def token_file(self):
-        ''' instance property '''
-        if self._token_file is None:
-            import os
-            import tempfile
-            return '%s/.%s-%s' % (tempfile.gettempdir(), os.getenv('USER'), 'token')
-        return self._token_file
-
-    @token_file.setter
-    def token_file(self, value):
-        ''' property setter '''
-        self._token_file = value
+        if value is None:
+            self._paths = self._defaults['paths']
+        elif not isinstance(value, dict):
+            ValueError('Argument paths excpects a dict with one or more keys: cache, config, temp')
+        else:
+            for key in value:
+                if key not in ['cache', 'config', 'temp']:
+                    self._logger.debug('Unknown path key: %s', key)
+                self._paths[key] = value[key]
 
     @property
     def username(self):
@@ -154,6 +142,8 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
     @authkey.setter
     def authkey(self, value):
         ''' property setter '''
+        if value is None:
+            return
         if self._authkey is None:
             self._authkey = value
         else:
@@ -178,43 +168,42 @@ if __name__ == '__main__':
     print('testing 1, 2, 3...')
     print('=============================')
 
-    test1 = UserObject('test1', '1test')
+    test1 = UserObject('test1', authkey='1test', paths={'temp': '/h/e/l/o'})
     print('test 1a:    %s / %s / %s / %s' % (test1.username, test1.password,
                                              test1.authkey, test1.client_id))
     test1.username = 'TEST1'
     test1.password = '1TEST'
     print('test 1b:    %s / %s / %s / %s' % (test1.username, test1.password,
                                              test1.authkey, test1.client_id))
-    print('cookie_file: %s' % (test1.cookie_file))
-    print('token_file:  %s' % (test1.token_file))
-    test1.cookie_file = '/path/to/cookie/file'
-    test1.token_file = '/path/to/token/file'
-    print('cookie_file: %s' % (test1.cookie_file))
-    print('token_file:  %s' % (test1.token_file))
+    print('-----------------------------')
+    print('test 1c:    %s - %s - %s' % (test1.paths['cache'], test1.paths['config'], test1.paths['temp']))
+    test1.paths = {'cache': '/path/to/cache', 'config': '/config/path', 'temp': '/path/for/temp'}
+    print('test 1d:    %s - %s - %s' % (test1.paths['cache'], test1.paths['config'], test1.paths['temp']))
+    test1.paths['cache'] = '/a/diff/path'
+    print('test 1e:    %s - %s - %s' % (test1.paths['cache'], test1.paths['config'], test1.paths['temp']))
     print('-----------------------------')
     pprint(vars(test1))
     print(test1)
     print(repr(test1))
-
     print('=============================')
 
-    test2 = UserObject('test2', '2test', 'dGVzdDI6MnRlc3Q=')
-    print('test 2a:    %s / %s / %s / %s' % (test2.username, test2.password,
-                                             test2.authkey, test2.client_id))
-    test2.username = 'TEST2'
-    test2.password = '2TEST'
-    print('test 2b:    %s / %s / %s / %s' % (test2.username, test2.password,
-                                             test2.authkey, test2.client_id))
-    print('-----------------------------')
-    pprint(vars(test2))
-    print(test2)
-    print(repr(test2))
+    # test2 = UserObject('test2', '2test', 'dGVzdDI6MnRlc3Q=')
+    # print('test 2a:    %s / %s / %s / %s' % (test2.username, test2.password,
+    #                                          test2.authkey, test2.client_id))
+    # test2.username = 'TEST2'
+    # test2.password = '2TEST'
+    # print('test 2b:    %s / %s / %s / %s' % (test2.username, test2.password,
+    #                                          test2.authkey, test2.client_id))
+    # print('-----------------------------')
+    # pprint(vars(test2))
+    # print(test2)
+    # print(repr(test2))
 
-    print('=============================')
+    # print('=============================')
 
-    if isinstance(test2, UserObject):
+    if isinstance(test1, UserObject):
         print('We got a UserObject')
     else:
-        print('UserObject requried! We got a %s (%s)' % (type(test2), test2.__class__.__name__))
-    print(test2.__doc__)
+        print('UserObject requried! We got a %s (%s)' % (type(test1), test1.__class__.__name__))
+    print(test1.__doc__)
     print('=============================')
