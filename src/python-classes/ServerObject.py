@@ -20,10 +20,23 @@ __cononical_name__ = 'ServerObject'
 #------------------------------------------------------------------------------
 ##--==
 #===============================================================================
-#-- UserObject v0.1.0
+#-- UserObject
 #==============================================================================
 class ServerObject(object): #: pylint: disable=useless-object-inheritance
-    ''' Hold server access data '''
+    '''Hold server/API access data
+
+        Args:
+            name          (str): Required. Server name as a string.
+            api_path      (str): Required. Path of API relative to base url.
+            base_url      (str): Over-ride default base url. Default: http://name
+            cookies_used (bool): Does the API use cookies?   Default: False
+            insecure     (bool): Ignore SSL verification?    Default: False
+            api_url       (str): Over-ride full URL for API. Default: base_url/api_path
+            token_needed (bool): Token-based login required? Default: False
+            token_url     (str): Full URL for Token authentication.
+
+        Returns:
+            A ServerObject.'''
     __version = '0.1.0'
 
     _api_path = None
@@ -182,4 +195,11 @@ if __name__ == '__main__':
     print(test1)
     print(repr(test1))
 
+    print('=============================')
+
+    if isinstance(test1, ServerObject):
+        print('We got a ServerObject')
+    else:
+        print('ServerObject requried! We got a %s (%s)' % (type(test1), test1.__class__.__name__))
+    print(test1.__doc__)
     print('=============================')

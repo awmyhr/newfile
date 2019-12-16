@@ -20,10 +20,24 @@ __cononical_name__ = 'UserObject'
 #------------------------------------------------------------------------------
 ##--==
 #===============================================================================
-#-- UserObject v0.2.0
+#-- UserObject
 #==============================================================================
 class UserObject(object): #: pylint: disable=useless-object-inheritance
-    ''' Hold user login and related data '''
+    '''Hold user login and related data
+
+        Args:
+            username    (str): User string for login.
+            password    (str): Password string for login.
+            authkey     (str): Base64 string for login.
+            client_id   (str): String required by some forms of login.
+            cookie_file (str): Path to file for holding cookie data.
+            token_file  (str): Path to file for holding token data.
+
+        If authkey is not passed, then username/password are reqrired.
+        If either of those are not passed, they will be asked for.
+
+        Returns:
+            An UserObject.'''
     __version = '0.2.0'
 
     _authkey = None
@@ -196,4 +210,11 @@ if __name__ == '__main__':
     print(test2)
     print(repr(test2))
 
+    print('=============================')
+
+    if isinstance(test2, UserObject):
+        print('We got a UserObject')
+    else:
+        print('UserObject requried! We got a %s (%s)' % (type(test2), test2.__class__.__name__))
+    print(test2.__doc__)
     print('=============================')
