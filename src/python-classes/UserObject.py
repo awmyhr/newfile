@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191216-125642
+# Revised:    20191216-141452
 # Created:    2019-12-13
 ''' Hold user login and related data '''
 #==============================================================================
@@ -185,7 +185,8 @@ if __name__ == '__main__':
     pprint(vars(test1))
     print(test1)
     print(repr(test1))
-    print('=============================')
+
+    # print('=============================')
 
     # test2 = UserObject('test2', '2test', 'dGVzdDI6MnRlc3Q=')
     # print('test 2a:    %s / %s / %s / %s' % (test2.username, test2.password,
@@ -199,11 +200,7 @@ if __name__ == '__main__':
     # print(test2)
     # print(repr(test2))
 
-    # print('=============================')
-
-    if isinstance(test1, UserObject):
-        print('We got a UserObject')
-    else:
-        print('UserObject requried! We got a %s (%s)' % (type(test1), test1.__class__.__name__))
+    print('=============================')
+    print('type: %s ; is UserObject? %s' % (type(test1), isinstance(test1, UserObject)))
     print(test1.__doc__)
     print('=============================')
