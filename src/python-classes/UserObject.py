@@ -46,6 +46,14 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
         'paths': {'cache': None, 'config': None, 'temp': None}
     }
 
+    @classmethod
+    def _is_tty(cls):
+        ''' class method to check if console is a tty '''
+        from sys import stdout
+        if stdout.isatty():
+            return True
+        return False
+
     def __init__(self, username=None, password=None, authkey=None, client_id=None,
                  paths=None):
         import logging
@@ -53,16 +61,22 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
         self._logger.debug('Initiallizing UserObject version %s.', self.__version)
         if authkey is None:
             if username is None:
-                username = raw_input('Username: ')
+                if self._is_tty():
+                    username = raw_input('Username: ')
+                else:
+                    raise ValueError('Username/password or authkey is required.')
             if password is None:
-                import getpass
-                password = getpass.getpass('Password: ')
+                if self._is_tty():
+                    import getpass
+                    password = getpass.getpass('Password: ')
+                else:
+                    raise ValueError('Username/password or authkey is required.')
         self._username = username
         self._password = password
         self._authkey = authkey
         self._client_id = client_id
         #-- Initilize the paths dict before setting from args
-        self._paths = self._defaults['paths']
+        self._paths = self._defaults['paths'].copy()
         self.paths = paths
 
     def __str__(self):
@@ -103,7 +117,7 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
     def paths(self, value):
         ''' property setter '''
         if value is None:
-            self._paths = self._defaults['paths']
+            self._paths = self._defaults['paths'].copy()
         elif not isinstance(value, dict):
             ValueError('Argument paths excpects a dict with one or more keys: cache, config, temp')
         else:

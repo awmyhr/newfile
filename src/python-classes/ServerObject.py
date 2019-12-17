@@ -37,7 +37,7 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
             token         (str): Relative path or full URL. Default: None
             token        (dict): Information about token. Default: None
                 token['file'] (str): Path to token file. Default: $TMP/.$USER-__cononical_name__
-                token['path'] (str): Path of Token auth relative to base url.
+                token['path'] (str): Path of Token auth relative to API url.
                 token['url']  (str): Full URL for Token authentication.
 
         A value for api is required. If it's a string, an attempt will be made
@@ -63,6 +63,15 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
         'token': {'file': None, 'path': None, 'url': None}
     }
 
+    @classmethod
+    def _is_url(cls, value):
+        ''' Check if a string looks like a web URL '''
+        from urlparse import urlparse
+        check = urlparse(value)
+        if check.scheme in ['http', 'https']:
+            return True
+        return False
+
     def __init__(self, name=None, base_url=None, insecure=False, api=None,
                  cookies=None, token=None):
         import logging
@@ -76,8 +85,8 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
         self._insecure = insecure
         self._base_url = base_url
         self._cookies = cookies
-        self._api = self._defaults['api']
-        self._token = self._defaults['token']
+        self._api = self._defaults['api'].copy()
+        self._token = self._defaults['token'].copy()
 
         self.api = api
         self.token = token
@@ -148,7 +157,11 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
     @property
     def api(self):
         ''' instance property '''
-        return self._api
+        if self._api['url'] is not None:
+            return self._api['url']
+        if self._api['path'] is not None:
+            return '%s/%s' % (self.base_url, self._api['path'])
+        return None
 
     @api.setter
     def api(self, value):
@@ -156,7 +169,6 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
         if isinstance(value, dict):
             if 'path' in value:
                 self._api['path'] = value['path']
-                self._api['url'] = '%s/%s' % (self.base_url, self._api['path'])
             if 'url' in value:
                 self._api['url'] = value['url']
             if 'url' not in value and 'path' not in value:
@@ -166,7 +178,6 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
                 self._api['url'] = value
             else:
                 self._api['path'] = value
-                self._api['url'] = '%s/%s' % (self.base_url, self._api['path'])
         else:
             raise ValueError('unuseable type for api (%s)' % type(value))
 
@@ -179,15 +190,6 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
     def token(self, value):
         ''' property setter '''
         self._token = value
-
-    @classmethod
-    def _is_url(cls, value):
-        ''' Check if a string looks like a web URL '''
-        from urlparse import urlparse
-        check = urlparse(value)
-        if check.scheme in ['http', 'https']:
-            return True
-        return False
 
 
 ##==---
