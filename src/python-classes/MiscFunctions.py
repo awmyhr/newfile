@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191211-101303
+# Revised:    20191217-152233
 # Created:    2019-12-10
 ''' My misc, generally useful Python functions '''
 #===============================================================================
@@ -17,7 +17,6 @@ from __future__ import print_function   #: Makes print a function, not a stateme
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
 import logging
 import os
-import sys
 #------------------------------------------------------------------------------
 __cononical_name__ = 'MiscFunctions'
 #------------------------------------------------------------------------------
@@ -26,8 +25,8 @@ __cononical_name__ = 'MiscFunctions'
 #-- MiscFunctions v2.0.0
 #==============================================================================
 def get_temp(directory=None, stem=None):
-    ''' Creates a temporary file (or directory), returning the path.
-        Defaults to file.
+    '''Creates a temporary file (or directory), returning the path.
+    Defaults to file.
 
     Args:
         program (str): Name of program to find.
@@ -35,11 +34,9 @@ def get_temp(directory=None, stem=None):
     Returns:
         For directory: absolute path to directory as a string.
         For a file: a tuple with OS-level handle to an open file.
-
     '''
     logger = logging.getLogger(__cononical_name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger.debug('stem: %s ; directory: %s', stem, directory)
+    logger.debug('Called: get_temp(stem=%s, directory: %s)', stem, directory)
 
     if stem is None:
         try:
@@ -54,18 +51,16 @@ def get_temp(directory=None, stem=None):
 
 #==============================================================================
 def get_timestamp(time_format=None):
-    ''' Return date in specified format
+    '''Return date in specified format
 
     Args:
         time_format (str): Format string for timestamp. Compatible w/'date'.
 
     Returns:
         The formatted timestamp as a string.
-
     '''
     logger = logging.getLogger(__cononical_name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger.debug('Passed format: %s', time_format)
+    logger.debug('Called: get_timestamp(%s)', time_format)
 
     import time
     if time_format is None:
@@ -78,6 +73,9 @@ def get_timestamp(time_format=None):
 #==============================================================================
 def is_valid_ipv4(ipaddr):
     '''Checks if passed paramater is a valid IPv4 address'''
+    logger = logging.getLogger(__cononical_name__)
+    logger.debug('Called: is_valid_ipv4(%s)', ipaddr)
+
     parts = ipaddr.split('.')
     if len(parts) != 4:
         return False
@@ -88,7 +86,7 @@ def is_valid_ipv4(ipaddr):
 
 #==============================================================================
 def set_value(filename, key, value):
-    ''' Add or change a KEY to a VALUE in a FILE, creating FILE if necessary.
+    '''Add or change a KEY to a VALUE in a FILE, creating FILE if necessary.
 
     Args:
         filename (str): File to create/modify
@@ -97,11 +95,9 @@ def set_value(filename, key, value):
 
     Returns:
         Success/failure as a Boolean.
-
     '''
     logger = logging.getLogger(__cononical_name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger.debug('Passed: file: %s, key: %s, value: %s', filename, key, value)
+    logger.debug('Called: set_value(file=%s, key=%s, value=%s)', filename, key, value)
 
     raise NotImplementedError('TODO: implement set_value().')
 
@@ -120,8 +116,7 @@ def which(program):
         http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
     '''
     logger = logging.getLogger(__cononical_name__)
-    logger.debug('Entering Function: %s', sys._getframe().f_code.co_name) #: pylint: disable=protected-access
-    logger.debug('Looking for command: %s', program)
+    logger.debug('Called: which(%s)', program)
 
     def _is_exe(fpath):
         ''' Private test for executeable '''
@@ -146,3 +141,18 @@ def which(program):
 
 ##==---
 #==============================================================================
+if __name__ == '__main__':
+    # from pprint import pprint
+    print('testing 1, 2, 3...')
+
+    print('=============================')
+    test1 = get_temp()
+    print('get_temp()            : %s' % test1)
+    test1 = get_temp("dir", "stuff")
+    print('get_temp(dir, "stuff"): %s' % test1)
+
+    print('=============================')
+    print('is_valid_ipv4("123.123.123.123"): %s' % is_valid_ipv4("123.123.123.123"))
+    print('is_valid_ipv4("nopenotatall")   : %s' % is_valid_ipv4("nopenotatall"))
+
+    print('=============================')
