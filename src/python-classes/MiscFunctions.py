@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191217-152233
+# Revised:    20191217-152829
 # Created:    2019-12-10
 ''' My misc, generally useful Python functions '''
 #===============================================================================
@@ -146,10 +146,8 @@ if __name__ == '__main__':
     print('testing 1, 2, 3...')
 
     print('=============================')
-    test1 = get_temp()
-    print('get_temp()            : %s' % test1)
-    test1 = get_temp("dir", "stuff")
-    print('get_temp(dir, "stuff"): %s' % test1)
+    print('get_temp()            : ' + str(get_temp()))
+    print('get_temp("dir", "stuff"): ' + get_temp("dir", "stuff"))
 
     print('=============================')
     print('is_valid_ipv4("123.123.123.123"): %s' % is_valid_ipv4("123.123.123.123"))
