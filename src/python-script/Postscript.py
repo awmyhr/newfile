@@ -7,7 +7,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191210
+# Revised:    20191217-133315
 # Created:    2019-12-10
 from __future__ import absolute_import  #: Require parens to group imports PEP-0328
 from __future__ import division         #: Enable 3.x True Division PEP-0238
@@ -17,9 +17,31 @@ from __future__ import unicode_literals #: Introduce bytes type for older string
 import logging      #: Python's standard logging facilities
 import os           #: Misc. OS interfaces
 import sys          #: System-specific parameters & functions
+#------------------------------------------------------------------------------
+__cononical_name__ = 'Postscript'
+EXIT_STATUS = None
+METAVARS = {
+    'name': __cononical_name__,
+    'basename': 'postscript.py',
+    'flags': {'require_root': False}
+}
+class Initilize(object): #: pylint: disable=useless-object-inheritance,too-few-public-methods
+    ''' dummy class for testing '''
+    def __init__(self, args, mvars):
+        self.logger = logging.getLogger(__cononical_name__)
+        self.logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(formatter)
+        self.logger.addHandler(console)
+        self.args = args
+        self.mvars = mvars
+        self.debug = False
+
 ##--==
 #==============================================================================
-#-- Postscript v2.0.0
+#-- Postscript v2.1.0
 #==============================================================================
 def main(options):
     ''' This is where the action takes place
@@ -27,35 +49,14 @@ def main(options):
     logger = logging.getLogger(options.mvars['name'])
     logger.debug('Starting main()')
     #-- TODO: Do something more interesting here...{#
-    logger.debug('debug message')
-    logger.info('info message')
-    logger.warning('warn message')
-    logger.error('error message')
-    logger.critical('critical message')
+    logger.debug('This is a debug message.')
+    logger.info('This is a info message.')
+    logger.warning('This is a warn message.')
+    logger.error('This is a error message.')
+    logger.critical('This is a critical message.')
 
-    # print('%sAnsible Called: %s' % (colors._colors['cf_white'], options.ansible_called))
-    # c = colors()
-    # print('%sAnsible Called: %s%s' % (c.white, c.reset, options.ansible_called))
-    # print('%sAnsible Called: %s' % (colors.white, options.ansible_called))
-    # from pprint import pprint
-    # print('%sAnsible Called: %s' % (colors._colors['cf_white'], options.ansible_called))
-    # print (options._options)
-    # print(timestamp())
-    # print('FILE')
-    # tempfile = get_temp()
-    # print(tempfile)
-    # os.remove(tempfile[1])
-    # print('DIR')
-    # tempdir = get_temp('dir')
-    # print(tempdir)
-    # os.rmdir(tempdir)
-    # print('THING')
-    # tempthing = get_temp('dat')
-    # print(tempthing)
-    # os.remove(tempthing[1])
-    # print(__logger_file_set__)
-    # raise OSError('Testing 1 2 3')
-    # set_value('file', 'key', 'value')
+    print('This is normal text.')
+    # Leave the next line, it is part of the Jinja templating
     #}
 
 
