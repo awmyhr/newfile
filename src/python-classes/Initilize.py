@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191210
+# Revised:    20191217-152232
 # Created:    2019-12-10
 ''' My base class for dealing with options and configurations '''
 #===============================================================================
@@ -185,19 +185,19 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
     def __init__(self, args=None, mvars=None):
         if not isinstance(mvars, dict):
             raise ValueError('A metavars dict is required!')
-        self.mvars = mvars
-        self.logger = logging.getLogger(mvars['name'])
-        self.logger.setLevel(logging.DEBUG)
         if self._configs is not None:
             raise ValueError('Configs already initialized.')
-        self._configs = self._load_configs(mvars['name'])
         if self._options is not None:
             raise ValueError('Arguments already initialized.')
+        self.mvars = mvars
+        self._logger = logging.getLogger(mvars['name'])
+        self._logger.setLevel(logging.DEBUG)
+        self._configs = self._load_configs(mvars['name'])
         (self._options, self._arguments) = self._parse_args(args, mvars['script'])
         self._init_logger(mvars['env'])
+        self._logger.debug('Initialized Initilize version %s.', self.__version)
         if self.debug or self._logger_file_set:
             self._debug_info(mvars['script'])
-        self.logger.debug('Initialized Initilize version %s.', self.__version)
 
     def __str__(self):
         return 'Configuration data for %s.' % self.mvars['name']
@@ -287,7 +287,7 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
         console = logging.StreamHandler()
         console.setLevel(level)
         console.setFormatter(formatter)
-        self.logger.addHandler(console)
+        self._logger.addHandler(console)
 
         #-- File output
         if env['logger_file']:
@@ -303,33 +303,33 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
                 env['logger_dsf']
                 )
             logfile.setFormatter(formatter)
-            self.logger.addHandler(logfile)
+            self._logger.addHandler(logfile)
             self._logger_file_set = True
 
     def _debug_info(self, script):
         import platform #: Easily get platforms identifying info
-        self.logger.debug('Version:   %s (%s) %s', script['cononical_name'],
-                          script['project_name'], script['version'])
-        self.logger.debug('Created:   %s / Revised: %s', script['created'], script['revised'])
-        self.logger.debug('Abs Path:  %s', os.path.abspath(sys.argv[0]))
-        self.logger.debug('Full Args: %s', ' '.join(sys.argv[:]))
-        self.logger.debug('Python:    %s (%s)', sys.executable, platform.python_version())
-        self.logger.debug('Coder(s):  %s', script['author'])
-        self.logger.debug('Contact:   %s', script['contact'])
-        self.logger.debug('Project Home: %s', ['project_home'])
-        self.logger.debug('Template Version: %s', script['template_version'])
-        self.logger.debug('System:    %s', platform.system_alias(platform.system(),
-                                                                 platform.release(),
-                                                                 platform.version()
-                                                                )
-                         )
-        self.logger.debug('Platform:  %s', platform.platform())
-        self.logger.debug('Hostname:  %s', platform.node())
-        self.logger.debug('Logname:   %s', os.getlogin())
-        self.logger.debug('[re]uid:  %s/%s', os.getuid(), os.geteuid())
-        self.logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
-        if self._options is not None:             #: pylint: disable=protected-access
-            self.logger.debug('Parsed Options: %s', self._options) #: pylint: disable=protected-access
+        self._logger.debug('Version:   %s (%s) %s', script['cononical_name'],
+                           script['project_name'], script['version'])
+        self._logger.debug('Created:   %s / Revised: %s', script['created'], script['revised'])
+        self._logger.debug('Abs Path:  %s', os.path.abspath(sys.argv[0]))
+        self._logger.debug('Full Args: %s', ' '.join(sys.argv[:]))
+        self._logger.debug('Python:    %s (%s)', sys.executable, platform.python_version())
+        self._logger.debug('Coder(s):  %s', script['author'])
+        self._logger.debug('Contact:   %s', script['contact'])
+        self._logger.debug('Project Home: %s', ['project_home'])
+        self._logger.debug('Template Version: %s', script['template_version'])
+        self._logger.debug('System:    %s', platform.system_alias(platform.system(),
+                                                                  platform.release(),
+                                                                  platform.version()
+                                                                 )
+                          )
+        self._logger.debug('Platform:  %s', platform.platform())
+        self._logger.debug('Hostname:  %s', platform.node())
+        self._logger.debug('Logname:   %s', os.getlogin())
+        self._logger.debug('[re]uid:  %s/%s', os.getuid(), os.geteuid())
+        self._logger.debug('PID/PPID:  %s/%s', os.getpid(), os.getppid())
+        if self._options is not None:
+            self._logger.debug('Parsed Options: %s', self._options)
         if self.debug:
             print('\n----- start -----\n')
 
