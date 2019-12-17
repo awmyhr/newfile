@@ -7,7 +7,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191217-133315
+# Revised:    20191217-145437
 # Created:    2019-12-10
 from __future__ import absolute_import  #: Require parens to group imports PEP-0328
 from __future__ import division         #: Enable 3.x True Division PEP-0238
@@ -64,9 +64,9 @@ def main(options):
 if __name__ == '__main__':
     #-- Parse configs/envs/options and set up logging
     OPTS = Initilize(args=sys.argv[1:], mvars=METAVARS)
-    # logger = logging.getLogger(OPTS.mvars['name'])
+    LOGGER = logging.getLogger(OPTS.mvars['name'])
     if OPTS.mvars['flags']['require_root'] and os.getegid() != 0:
-        OPTS.logger.error('Must be run as root.')
+        LOGGER.error('Must be run as root.')
         sys.exit(77)
 
     #-- NOTE: "except Exception as variable:" syntax was added in 2.6, previously
@@ -80,44 +80,44 @@ if __name__ == '__main__':
         main(OPTS)
     except SystemExit as error: # Catches sys.exit()
         #_, error, _ = sys.exc_info()
-        OPTS.logger.debug('Caught SystemExit')
-        OPTS.logger.warning('%s: [SystemExit] %s', OPTS.mvars['basename'], error)
+        LOGGER.debug('Caught SystemExit')
+        LOGGER.warning('%s: [SystemExit] %s', OPTS.mvars['basename'], error)
     except KeyboardInterrupt: # Catches Ctrl-C
-        OPTS.logger.debug('Caught Ctrl-C')
+        LOGGER.debug('Caught Ctrl-C')
         EXIT_STATUS = 130
     except (OSError, IOError) as error:
         #_, error, _ = sys.exc_info()
-        OPTS.logger.debug('Caught OSError')
+        LOGGER.debug('Caught OSError')
         if error.errno is None:
-            OPTS.logger.critical('%s: [OSError]: %s', OPTS.mvars['basename'], error)
+            LOGGER.critical('%s: [OSError]: %s', OPTS.mvars['basename'], error)
             EXIT_STATUS = 10
         elif error.errno == 2:                #: No such file/directory
-            OPTS.logger.critical('%s: [OSError] %s: %s', OPTS.mvars['basename'],
-                                 error, error.filename
-                                )
+            LOGGER.critical('%s: [OSError] %s: %s', OPTS.mvars['basename'],
+                            error, error.filename
+                           )
             EXIT_STATUS = os.EX_UNAVAILABLE
         elif error.errno == 13:                #: Permission Denied
-            OPTS.logger.critical('%s: [OSError] %s: %s', OPTS.mvars['basename'],
-                                 error, error.filename
-                                )
+            LOGGER.critical('%s: [OSError] %s: %s', OPTS.mvars['basename'],
+                            error, error.filename
+                           )
             EXIT_STATUS = os.EX_NOPERM
         else:
-            OPTS.logger.critical('%s: [OSError] %s', OPTS.mvars['basename'], error)
+            LOGGER.critical('%s: [OSError] %s', OPTS.mvars['basename'], error)
             EXIT_STATUS = error.errno
     except Exception as error:                   #: pylint: disable=broad-except
         #_, error, _ = sys.exc_info()
-        OPTS.logger.debug('Caught Exception: %s', sys.exc_info())
-        OPTS.logger.critical('%s: %s', OPTS.mvars['basename'], error)
+        LOGGER.debug('Caught Exception: %s', sys.exc_info())
+        LOGGER.critical('%s: %s', OPTS.mvars['basename'], error)
         EXIT_STATUS = 10
     else:
-        OPTS.logger.debug('main() exited cleanly.')
+        LOGGER.debug('main() exited cleanly.')
         if EXIT_STATUS is None:
             EXIT_STATUS = os.EX_OK
     #-- NOTE: "try..except..finally" does not work pre 2.5
     finally:
-        OPTS.logger.debug('Mandatory clean-up.')
+        LOGGER.debug('Mandatory clean-up.')
         if EXIT_STATUS is None:
-            OPTS.logger.debug('EXIT_STATUS is still None.')
+            LOGGER.debug('EXIT_STATUS is still None.')
             EXIT_STATUS = 20
         if OPTS.debug:
             print('\n------ end ------\n')
