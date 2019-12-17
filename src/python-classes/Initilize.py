@@ -20,6 +20,35 @@ import os
 import sys
 #------------------------------------------------------------------------------
 __cononical_name__ = 'Initilize'
+METAVARS = {
+    u'name': u'Initilize',
+    u'basename': 'initilize.py',
+    u'env': {
+        u'backup_dsf': '+%Y%m%d-%H%M%S',
+        u'default_dsf': '+%Y%m%d-%H%M%S',
+        u'logger_dsf': '+%Y%m%d-%H%M%S',
+        u'logger_file': None,
+        u'logger_lvl': u'info'
+    },
+    u'flags': {u'gnu_version': False, u'require_root': False},
+    u'script': {
+        u'author': [u'Test Author <test.author@test.com>'],
+        u'basename': 'initilize.py',
+        u'cononical_name': u'Initilize',
+        u'contact': u' <Test Contact <test.contact@test.com>>',
+        u'copyright': u'Test CR',
+        u'created': u'2019-12-17',
+        u'description': u'Test data for METAVARS\n',
+        u'docformat': u'reStructuredText en',
+        u'license': u'Test Lic',
+        u'project_home': u'Project Home',
+        u'project_name': u'Project Name',
+        u'revised': u'20191217-125940',
+        u'synopsis': u'dummy data for METAVARS for testing.',
+        u'template_version': u'3.0.0',
+        u'version': u'2.0.0'
+    }
+}
 #------------------------------------------------------------------------------
 ##--==
 #==============================================================================
@@ -115,12 +144,14 @@ class _ReSTHelpFormatter(optparse.HelpFormatter):
 
 #==============================================================================
 class Initilize(object): #: pylint: disable=useless-object-inheritance
-    ''' Parse the configuration and options; set up logging
+    '''Parse the configuration and options; set up logging
 
-        Returns:
-            An object containing settings.
+    Args:
+        args  (list): sys.argv[1:]
+        mvars (dict): The METAVARS dict from Preamble
 
-    '''
+    Returns:
+        An object containing settings.'''
     __version = '2.0.0'
 
     _defaults = {
@@ -152,7 +183,7 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
         return bool(self.mvars['basename'].startswith('ansible_module'))
 
     def __init__(self, args=None, mvars=None):
-        if mvars is None:
+        if not isinstance(mvars, dict):
             raise ValueError('A metavars dict is required!')
         self.mvars = mvars
         self.logger = logging.getLogger(mvars['name'])
@@ -167,6 +198,12 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
         if self.debug or self._logger_file_set:
             self._debug_info(mvars['script'])
         self.logger.debug('Initialized Initilize version %s.', self.__version)
+
+    def __str__(self):
+        return 'Configuration data for %s.' % self.mvars['name']
+
+    def __repr__(self):
+        return 'Initilize(args=sys.argv[1:], mvars=METAVARS)'
 
     def _load_configs(self, name):
         parser = ConfigParser.SafeConfigParser(defaults=self._defaults)
@@ -299,3 +336,19 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
 
 ##==---
 #==============================================================================
+if __name__ == '__main__':
+    from pprint import pprint
+    print('testing 1, 2, 3...')
+
+    print('=============================')
+    test1 = Initilize(args=sys.argv[1:], mvars=METAVARS)
+    print('-----------------------------')
+    pprint(vars(test1))
+
+    print('=============================')
+    print(test1)
+    print(repr(test1))
+    print('type: %s ; is Initilize? %s' % (type(test1), isinstance(test1, Initilize)))
+    print('-----------------------------')
+    print(test1.__doc__)
+    print('=============================')

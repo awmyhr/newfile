@@ -25,21 +25,21 @@ __cononical_name__ = 'UserObject'
 class UserObject(object): #: pylint: disable=useless-object-inheritance
     '''Hold user login and related data
 
-        Args:
-            username    (str): User string for login.
-            password    (str): Password string for login.
-            authkey     (str): Base64 string for login.
-            client_id   (str): String required by some forms of login.
-            paths      (dict): Holds filesystem paths for user data.
-                paths['cache']  (str): User cache path.
-                paths['config'] (str): User configuration path.
-                paths['temp']   (str): User temp path.
+    Args:
+        username    (str): User string for login.
+        password    (str): Password string for login.
+        authkey     (str): Base64 string for login.
+        client_id   (str): String required by some forms of login.
+        paths      (dict): Holds filesystem paths for user data.
+            paths['cache']  (str): User cache path.
+            paths['config'] (str): User configuration path.
+            paths['temp']   (str): User temp path.
 
-        If authkey is not passed, then username/password are reqrired.
-        If either of those are not passed, they will be asked for.
+    If authkey is not passed, then username/password are reqrired.
+    If either of those are not passed, they will be asked for.
 
-        Returns:
-            An UserObject.'''
+    Returns:
+        An UserObject.'''
     __version = '0.3.0'
 
     _defaults = {
@@ -53,50 +53,6 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
         if stdout.isatty():
             return True
         return False
-
-    def __init__(self, username=None, password=None, authkey=None, client_id=None,
-                 paths=None):
-        import logging
-        self._logger = logging.getLogger(__cononical_name__)
-        self._logger.debug('Initiallizing UserObject version %s.', self.__version)
-        if authkey is None:
-            if username is None:
-                if self._is_tty():
-                    username = raw_input('Username: ')
-                else:
-                    raise ValueError('Username/password or authkey is required.')
-            if password is None:
-                if self._is_tty():
-                    import getpass
-                    password = getpass.getpass('Password: ')
-                else:
-                    raise ValueError('Username/password or authkey is required.')
-        self._username = username
-        self._password = password
-        self._authkey = authkey
-        self._client_id = client_id
-        #-- Initilize the paths dict before setting from args
-        self._paths = self._defaults['paths'].copy()
-        self.paths = paths
-
-    def __str__(self):
-        if self.username is not None:
-            return 'Data for user %s' % self.username
-        return 'Data for authkey %s' % self.authkey
-
-    def __repr__(self):
-        params = []
-        if self._username is not None:
-            params.append('username="%s"' % self.username)
-        if self._password is not None:
-            params.append('password="%s"' % self.password)
-        if self._authkey is not None:
-            params.append('authkey="%s"' % self.authkey)
-        if self._client_id is not None:
-            params.append('client_id="%s"' % self.client_id)
-        if self._paths is not None:
-            params.append('paths="%s"' % self.paths)
-        return 'UserObject(%s)' % ', '.join(params)
 
     @property
     def client_id(self):
@@ -166,6 +122,50 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
                 raise ValueError('Username/Password authkey do not match passed authkey (%s / %s).'
                                  % (self._authkey, value))
 
+    def __init__(self, username=None, password=None, authkey=None, client_id=None,
+                 paths=None):
+        import logging
+        self._logger = logging.getLogger(__cononical_name__)
+        self._logger.debug('Initiallizing UserObject version %s.', self.__version)
+        if authkey is None:
+            if username is None:
+                if self._is_tty():
+                    username = raw_input('Username: ')
+                else:
+                    raise ValueError('Username/password or authkey is required.')
+            if password is None:
+                if self._is_tty():
+                    import getpass
+                    password = getpass.getpass('Password: ')
+                else:
+                    raise ValueError('Username/password or authkey is required.')
+        self._username = username
+        self._password = password
+        self._authkey = authkey
+        self._client_id = client_id
+        #-- Initilize the paths dict before setting from args
+        self._paths = self._defaults['paths'].copy()
+        self.paths = paths
+
+    def __str__(self):
+        if self.username is not None:
+            return 'Data for user %s' % self.username
+        return 'Data for authkey %s' % self.authkey
+
+    def __repr__(self):
+        params = []
+        if self._username is not None:
+            params.append('username="%s"' % self.username)
+        if self._password is not None:
+            params.append('password="%s"' % self.password)
+        if self._authkey is not None:
+            params.append('authkey="%s"' % self.authkey)
+        if self._client_id is not None:
+            params.append('client_id="%s"' % self.client_id)
+        if self._paths is not None:
+            params.append('paths="%s"' % self.paths)
+        return 'UserObject(%s)' % ', '.join(params)
+
     def _gen_authkey(self):
         ''' instance function to generate base64 authkey '''
         if self.username is None or self.password is None:
@@ -180,8 +180,8 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
 if __name__ == '__main__':
     from pprint import pprint
     print('testing 1, 2, 3...')
-    print('=============================')
 
+    print('=============================')
     test1 = UserObject('test1', authkey='1test', paths={'temp': '/h/e/l/o'})
     print('test 1a:    %s / %s / %s / %s' % (test1.username, test1.password,
                                              test1.authkey, test1.client_id))
@@ -197,11 +197,8 @@ if __name__ == '__main__':
     print('test 1e:    %s - %s - %s' % (test1.paths['cache'], test1.paths['config'], test1.paths['temp']))
     print('-----------------------------')
     pprint(vars(test1))
-    print(test1)
-    print(repr(test1))
 
     # print('=============================')
-
     # test2 = UserObject('test2', '2test', 'dGVzdDI6MnRlc3Q=')
     # print('test 2a:    %s / %s / %s / %s' % (test2.username, test2.password,
     #                                          test2.authkey, test2.client_id))
@@ -211,10 +208,11 @@ if __name__ == '__main__':
     #                                          test2.authkey, test2.client_id))
     # print('-----------------------------')
     # pprint(vars(test2))
-    # print(test2)
-    # print(repr(test2))
 
     print('=============================')
+    print(test1)
+    print(repr(test1))
     print('type: %s ; is UserObject? %s' % (type(test1), isinstance(test1, UserObject)))
+    print('-----------------------------')
     print(test1.__doc__)
     print('=============================')
