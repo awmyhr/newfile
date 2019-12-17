@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191210
+# Revised:    20191217-125940
 # Created:    2019-12-10
 ##--==
 #!/usr/bin/python2 -tt
@@ -85,7 +85,7 @@ if sys.version_info <= (2, 6):
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
 __version__ = '{{ version|default("TODO: CHANGEME", true) }}' #: current version
-__revised__ = '20190705-153700' #: date of most recent revision
+__revised__ = '20191217-125940' #: date of most recent revision
 __contact__ = '{{ contact_name|default("TODO: CHANGEME", true) }} <{{ contact_email|default("TODO: CHANGEME", true) }}>' #: primary contact for support/?'s
 __synopsis__ = '{{ script_synopsis|default("TODO: CHANGEME", true) }}'
 __description__ = '''{{ script_description|default("TODO: CHANGEME", true) }}
@@ -153,3 +153,9 @@ METAVARS = {
 
 ##==---
 #==============================================================================
+if __name__ == '__main__':
+    from pprint import pprint
+    print('testing 1, 2, 3...')
+    print('=============================')
+    pprint(METAVARS)
+    print('=============================')
