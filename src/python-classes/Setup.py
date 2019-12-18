@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191218-113351
+# Revised:    20191218-114935
 # Created:    2019-12-10
 ''' My base class for dealing with options and configurations '''
 #===============================================================================
@@ -187,18 +187,17 @@ class Setup(object): #: pylint: disable=useless-object-inheritance
         return bool(self.mvars['basename'].startswith('ansible_module'))
 
     def __init__(self, args=None, mvars=None):
-        if Setup._mvars is None:
-            if not isinstance(mvars, dict):
-                raise ValueError('A metavars dict is required on first call!')
-            Setup._mvars = mvars
-        if Setup._configs is None:
-            Setup._configs = self._load_configs(self.mvars['name'])
-        if Setup._options is None:
-            (Setup._options, Setup._arguments) = self._parse_args(args, self.mvars['script'])
-
         if self._init_done:
-            self._logger.debug('Additional instnace of Setup ready.')
+            self._logger.debug('Additional instance of Setup ready.')
         else:
+            if Setup._mvars is None:
+                if not isinstance(mvars, dict):
+                    raise ValueError('A metavars dict is required on first call!')
+                Setup._mvars = mvars
+            if Setup._configs is None:
+                Setup._configs = self._load_configs(self.mvars['name'])
+            if Setup._options is None:
+                (Setup._options, Setup._arguments) = self._parse_args(args, self.mvars['script'])
             self._logger.setLevel(logging.DEBUG)
             self._init_logger(self.mvars['env'])
             self._logger.debug('Initialized Setup version %s.', self.__version)
