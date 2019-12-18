@@ -22,7 +22,7 @@ import sys
 __cononical_name__ = 'Setup'
 METAVARS = {
     u'name': u'Setup',
-    u'basename': 'initilize.py',
+    u'basename': 'setup.py',
     u'env': {
         u'backup_dsf': '+%Y%m%d-%H%M%S',
         u'default_dsf': '+%Y%m%d-%H%M%S',
@@ -33,7 +33,7 @@ METAVARS = {
     u'flags': {u'gnu_version': False, u'require_root': False},
     u'script': {
         u'author': [u'Test Author <test.author@test.com>'],
-        u'basename': 'initilize.py',
+        u'basename': 'setup.py',
         u'cononical_name': u'Setup',
         u'contact': u' <Test Contact <test.contact@test.com>>',
         u'copyright': u'Test CR',
