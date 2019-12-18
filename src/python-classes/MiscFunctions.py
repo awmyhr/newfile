@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191217-152829
+# Revised:    20191218-102122
 # Created:    2019-12-10
 ''' My misc, generally useful Python functions '''
 #===============================================================================
@@ -145,12 +145,18 @@ if __name__ == '__main__':
     # from pprint import pprint
     print('testing 1, 2, 3...')
 
-    print('=============================')
-    print('get_temp()            : ' + str(get_temp()))
-    print('get_temp("dir", "stuff"): ' + get_temp("dir", "stuff"))
+    print('====================================================================')
+    print('get_temp()                      : %s' % str(get_temp()))
+    print('get_temp("dir", "stuff")        : %s' % get_temp("dir", "stuff"))
 
-    print('=============================')
+    print('====================================================================')
+    print('get_timestamp()                 : %s' % get_timestamp())
+    print('get_timestamp("%s")       : %s' % ('%Y/%m/%d', get_timestamp('%Y/%m/%d')))
+
+    print('====================================================================')
     print('is_valid_ipv4("123.123.123.123"): %s' % is_valid_ipv4("123.123.123.123"))
     print('is_valid_ipv4("nopenotatall")   : %s' % is_valid_ipv4("nopenotatall"))
 
-    print('=============================')
+    print('====================================================================')
+    print('which("python")                 : %s' % which("python"))
+    print('which("nope")                   : %s' % which("nope"))
