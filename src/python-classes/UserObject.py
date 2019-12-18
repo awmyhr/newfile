@@ -15,6 +15,7 @@ from __future__ import division         #: Enable 3.x True Division PEP-0238
 from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
+# import logging
 #------------------------------------------------------------------------------
 __cononical_name__ = 'UserObject'
 #------------------------------------------------------------------------------
@@ -40,11 +41,13 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
 
     Returns:
         An UserObject.'''
+    import logging
     __version = '0.3.0'
 
     _defaults = {
         'paths': {'cache': None, 'config': None, 'temp': None}
     }
+    _logger = logging.getLogger(__cononical_name__)
 
     @classmethod
     def _is_tty(cls):
@@ -124,8 +127,6 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
 
     def __init__(self, username=None, password=None, authkey=None, client_id=None,
                  paths=None):
-        import logging
-        self._logger = logging.getLogger(__cononical_name__)
         self._logger.debug('Initiallizing UserObject version %s.', self.__version)
         if authkey is None:
             if username is None:

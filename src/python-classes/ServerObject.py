@@ -56,12 +56,14 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
 
     Returns:
         A ServerObject.'''
+    import logging
     __version = '0.2.0'
 
     _defaults = {
         'api': {'path': None, 'url': None},
         'token': {'file': None, 'path': None, 'url': None}
     }
+    _logger = logging.getLogger(__cononical_name__)
 
     @classmethod
     def _is_url(cls, value):
@@ -155,8 +157,6 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
 
     def __init__(self, name=None, base_url=None, insecure=False, api=None,
                  cookies=None, token=None):
-        import logging
-        self._logger = logging.getLogger(__cononical_name__)
         self._logger.debug('Initiallizing ServerObject version %s.', self.__version)
         if name is None:
             raise ValueError('name is a required paramater.')
