@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191218-111246
+# Revised:    20191218-113351
 # Created:    2019-12-10
 ''' My base class for dealing with options and configurations '''
 #===============================================================================
@@ -15,7 +15,6 @@ from __future__ import division         #: Enable 3.x True Division PEP-0238
 from __future__ import with_statement   #: Clean up some uses of try/except PEP--343
 from __future__ import print_function   #: Makes print a function, not a statement PEP-3105
 from __future__ import unicode_literals #: Introduce bytes type for older strings PEP-3112
-import logging
 import os
 import sys
 #------------------------------------------------------------------------------
@@ -54,14 +53,11 @@ METAVARS = {
 #==============================================================================
 #-- Setup v2.0.0
 #==============================================================================
-try:
-    import ConfigParser #: 'Easy' configuration parsing
-except ImportError:
-    import configparser as ConfigParser#: At some point this was required...
 #-- NOTE: We use optparse for compatibility with python < 2.7 as
 #--       argparse wasn't standard until 2.7 (2.7 deprecates optparse)
 #--       As of 20161212 the template is coded for optparse only
-import optparse #: pylint: disable=deprecated-module
+import optparse #: pylint: disable=deprecated-module,wrong-import-position
+import logging #: pylint: disable=wrong-import-position
 #==============================================================================
 class _ModOptionParser(optparse.OptionParser):
     ''' By default format_epilog() strips newlines, we don't want that,
@@ -217,6 +213,10 @@ class Setup(object): #: pylint: disable=useless-object-inheritance
         return 'Setup(args=sys.argv[1:], mvars=METAVARS)'
 
     def _load_configs(self, name):
+        try:
+            import ConfigParser #: 'Easy' configuration parsing
+        except ImportError:
+            import configparser as ConfigParser#: At some point this was required...
         parser = ConfigParser.SafeConfigParser(defaults=self._defaults)
         parser.read([os.path.expanduser('~/.%s' % name),
                      '%s.cfg' % name])
