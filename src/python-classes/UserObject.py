@@ -37,10 +37,7 @@ class UserObject(object): #: pylint: disable=useless-object-inheritance
             paths['temp']   (str): User temp path.
 
     If authkey is not passed, then username/password are reqrired.
-    If either of those are not passed, they will be asked for.
-
-    Returns:
-        An UserObject.'''
+    If either of those are not passed, they will be asked for.'''
     import logging
     __version = '0.3.0'
 

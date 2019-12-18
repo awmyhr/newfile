@@ -52,10 +52,7 @@ class ServerObject(object): #: pylint: disable=useless-object-inheritance
         url key is required. If an unuseable value is passed, a ValueError
         will be raised.
     If cookies is None, then cookies will not be used. Otherwise, should be
-        valid filesystem path to a writeable file.
-
-    Returns:
-        A ServerObject.'''
+        valid filesystem path to a writeable file.'''
     import logging
     __version = '0.2.0'
 

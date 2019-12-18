@@ -144,10 +144,7 @@ class Setup(object): #: pylint: disable=useless-object-inheritance
 
     Args:
         args  (list): sys.argv[1:]
-        mvars (dict): The METAVARS dict from Preamble
-
-    Returns:
-        An object containing settings.'''
+        mvars (dict): The METAVARS dict from Preamble'''
     __version = '2.2.0'
 
     _defaults = {

@@ -72,7 +72,18 @@ def get_timestamp(time_format=None):
 
 #==============================================================================
 def is_valid_ipv4(ipaddr):
-    '''Checks if passed paramater is a valid IPv4 address'''
+    '''Checks if passed paramater is a valid IPv4 address
+
+    Args:
+        ipaddr (str): String to test
+
+    Returns:
+        True/False
+
+    Note:
+        Originally found this here:
+        https://stackoverflow.com/questions/3462784/check-if-a-string-matches-an-ip-address-pattern-in-python
+    '''
     logger = logging.getLogger(__cononical_name__)
     logger.debug('Called: is_valid_ipv4(%s)', ipaddr)
 
@@ -109,7 +120,7 @@ def which(program):
         program (str): Name of program to find.
 
     Returns:
-        String to use for program execution.
+        Path to executeable as a string.
 
     Note:
         Originally found this here:
