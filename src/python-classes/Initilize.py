@@ -6,7 +6,7 @@
 # Proj Home:  https://github.com/awmyhr/newfile
 # Copyright:  2019 awmyhr
 # License:    Apache-2.0
-# Revised:    20191217-152232
+# Revised:    20191218-111246
 # Created:    2019-12-10
 ''' My base class for dealing with options and configurations '''
 #===============================================================================
@@ -19,9 +19,9 @@ import logging
 import os
 import sys
 #------------------------------------------------------------------------------
-__cononical_name__ = 'Initilize'
+__cononical_name__ = 'Setup'
 METAVARS = {
-    u'name': u'Initilize',
+    u'name': u'Setup',
     u'basename': 'initilize.py',
     u'env': {
         u'backup_dsf': '+%Y%m%d-%H%M%S',
@@ -34,7 +34,7 @@ METAVARS = {
     u'script': {
         u'author': [u'Test Author <test.author@test.com>'],
         u'basename': 'initilize.py',
-        u'cononical_name': u'Initilize',
+        u'cononical_name': u'Setup',
         u'contact': u' <Test Contact <test.contact@test.com>>',
         u'copyright': u'Test CR',
         u'created': u'2019-12-17',
@@ -52,7 +52,7 @@ METAVARS = {
 #------------------------------------------------------------------------------
 ##--==
 #==============================================================================
-#-- Initilize v2.0.0
+#-- Setup v2.0.0
 #==============================================================================
 try:
     import ConfigParser #: 'Easy' configuration parsing
@@ -143,7 +143,7 @@ class _ReSTHelpFormatter(optparse.HelpFormatter):
 
 
 #==============================================================================
-class Initilize(object): #: pylint: disable=useless-object-inheritance
+class Setup(object): #: pylint: disable=useless-object-inheritance
     '''Parse the configuration and options; set up logging
 
     Args:
@@ -152,7 +152,7 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
 
     Returns:
         An object containing settings.'''
-    __version = '2.0.0'
+    __version = '2.2.0'
 
     _defaults = {
         'debug': False
@@ -160,8 +160,11 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
 
     _arguments = None
     _configs = None
-    _options = None
+    _init_done = False
+    _logger = logging.getLogger(__cononical_name__)
     _logger_file_set = False
+    _mvars = None
+    _options = None
 
     @property
     def args(self):
@@ -178,32 +181,40 @@ class Initilize(object): #: pylint: disable=useless-object-inheritance
         return self._defaults['debug']
 
     @property
+    def mvars(self):
+        ''' Class property '''
+        return self._mvars
+
+    @property
     def ansible_called(self):
         ''' Class property '''
         return bool(self.mvars['basename'].startswith('ansible_module'))
 
     def __init__(self, args=None, mvars=None):
-        if not isinstance(mvars, dict):
-            raise ValueError('A metavars dict is required!')
-        if self._configs is not None:
-            raise ValueError('Configs already initialized.')
-        if self._options is not None:
-            raise ValueError('Arguments already initialized.')
-        self.mvars = mvars
-        self._logger = logging.getLogger(mvars['name'])
-        self._logger.setLevel(logging.DEBUG)
-        self._configs = self._load_configs(mvars['name'])
-        (self._options, self._arguments) = self._parse_args(args, mvars['script'])
-        self._init_logger(mvars['env'])
-        self._logger.debug('Initialized Initilize version %s.', self.__version)
-        if self.debug or self._logger_file_set:
-            self._debug_info(mvars['script'])
+        if Setup._mvars is None:
+            if not isinstance(mvars, dict):
+                raise ValueError('A metavars dict is required on first call!')
+            Setup._mvars = mvars
+        if Setup._configs is None:
+            Setup._configs = self._load_configs(self.mvars['name'])
+        if Setup._options is None:
+            (Setup._options, Setup._arguments) = self._parse_args(args, self.mvars['script'])
+
+        if self._init_done:
+            self._logger.debug('Additional instnace of Setup ready.')
+        else:
+            self._logger.setLevel(logging.DEBUG)
+            self._init_logger(self.mvars['env'])
+            self._logger.debug('Initialized Setup version %s.', self.__version)
+            if self.debug or self._logger_file_set:
+                self._debug_info(self.mvars['script'])
+            Setup._init_done = True
 
     def __str__(self):
         return 'Configuration data for %s.' % self.mvars['name']
 
     def __repr__(self):
-        return 'Initilize(args=sys.argv[1:], mvars=METAVARS)'
+        return 'Setup(args=sys.argv[1:], mvars=METAVARS)'
 
     def _load_configs(self, name):
         parser = ConfigParser.SafeConfigParser(defaults=self._defaults)
@@ -341,14 +352,21 @@ if __name__ == '__main__':
     print('testing 1, 2, 3...')
 
     print('=============================')
-    test1 = Initilize(args=sys.argv[1:], mvars=METAVARS)
+    test1 = Setup(args=sys.argv[1:], mvars=METAVARS)
     print('-----------------------------')
     pprint(vars(test1))
+    pprint(test1.mvars)
+
+    print('=============================')
+    test2 = Setup()
+    print('-----------------------------')
+    pprint(vars(test2))
+    pprint(test2.mvars)
 
     print('=============================')
     print(test1)
     print(repr(test1))
-    print('type: %s ; is Initilize? %s' % (type(test1), isinstance(test1, Initilize)))
+    print('type: %s ; is Setup? %s' % (type(test1), isinstance(test1, Setup)))
     print('-----------------------------')
     print(test1.__doc__)
     print('=============================')
