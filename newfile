@@ -49,8 +49,8 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 #===============================================================================
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
-__version__ = '1.4.0'
-__revised__ = '20171210-184816'
+__version__ = '1.4.1'
+__revised__ = '20200226-103709'
 __contact__ = 'awmyhr <awmyhr@gmail.com>'  #: primary contact for support/?'s
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/templates'
 
@@ -470,7 +470,7 @@ if __name__ == '__main__':
 
     if OPTIONS.debug:
         _debug_info()
-        print '\n----- start -----\n'
+        print('\n----- start -----\n')
 
     #-- Do The Stuff
     try:
@@ -517,5 +517,5 @@ if __name__ == '__main__':
             raise #: pylint: disable=misplaced-bare-raise
                   #: Ignoring this here until I find a Better Way(TM)
         if OPTIONS.debug:
-            print '\n------ end ------\n'
+            print('\n------ end ------\n')
         sys.exit(EXIT_STATUS)
