@@ -49,8 +49,8 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 #===============================================================================
 #-- Variables which are meta for the script should be dunders (__varname__)
 #-- TODO: Update meta vars
-__version__ = '1.4.1'
-__revised__ = '20200226-103709'
+__version__ = '1.4.2'
+__revised__ = '20200226-114715'
 __contact__ = 'awmyhr <awmyhr@gmail.com>'  #: primary contact for support/?'s
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/templates'
 
@@ -321,7 +321,7 @@ def get_context(script_name, config_file):
     context['full_name'] = get_git('user.name')
     context['email'] = get_git('user.email')
     if config_file is not None:
-        for key, value in yaml.load(open(config_file, 'r')).iteritems():
+        for key, value in yaml.load(open(config_file, 'r'), Loader=yaml.SafeLoader).items():
             context[key] = value
     else:
         logger.warning('No config file found, check TODOs.')
