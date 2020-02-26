@@ -1,14 +1,14 @@
 {
-  projectrc_version: '1.0.0',
-  contact_email: '{{ contact_email|default('TODO: CHANGEME', true) }}',
-  contact_name: '{{ contact_name|default('TODO: CHANGEME', true) }}',
-  email: '{{ email|default('TODO: CHANGEME', true) }}',
-  full_name: '{{ full_name|default('TODO: CHANGEME', true) }}',
-  project_home: '{{ project_home|default('TODO: CHANGEME', true) }}',
-  project_name: '{{ project_name|default('TODO: CHANGEME', true) }}',
-  project_slug: '{{ project_slug|default('TODO: CHANGEME', true) }}',
-  project_abbr: '{{ project_abbr|default('TODO: CHANGEME', true) }}',
-  project_version: '{{ project_version|default('TODO: CHANGEME', true) }}',
-  software_copyright: '{{ software_copyright|default('TODO: CHANGEME', true) }}',
-  software_license: '{{ software_license|default('TODO: CHANGEME', true) }}'
+  "projectrc_version": '1.0.1',
+  "contact_email": '{{ contact_email|default('TODO: CHANGEME', true) }}',
+  "contact_name": '{{ contact_name|default('TODO: CHANGEME', true) }}',
+  "email": '{{ email|default('TODO: CHANGEME', true) }}',
+  "full_name": '{{ full_name|default('TODO: CHANGEME', true) }}',
+  "project_home": '{{ project_home|default('TODO: CHANGEME', true) }}',
+  "project_name": '{{ project_name|default('TODO: CHANGEME', true) }}',
+  "project_slug": '{{ project_slug|default('TODO: CHANGEME', true) }}',
+  "project_abbr": '{{ project_abbr|default('TODO: CHANGEME', true) }}',
+  "project_version": '{{ project_version|default('TODO: CHANGEME', true) }}',
+  "software_copyright": '{{ software_copyright|default('TODO: CHANGEME', true) }}',
+  "software_license": '{{ software_license|default('TODO: CHANGEME', true) }}'
 }
